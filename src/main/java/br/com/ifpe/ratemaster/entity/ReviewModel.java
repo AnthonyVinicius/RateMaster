@@ -1,7 +1,14 @@
-package br.com.ifpe.ratemaster;
+package br.com.ifpe.ratemaster.entity;
 import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
+@Table(name = "tb_review")
+@Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ReviewModel {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,43 +22,4 @@ public class ReviewModel {
 	@JoinColumn(name = "product_id")
 	private ProductModel productModel;
 
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getComment() {
-		return comment;
-	}
-
-	public void setComment(String comment) {
-		this.comment = comment;
-	}
-
-	public Integer getRating() {
-		return rating;
-	}
-
-	public void setRating(Integer rating) {
-		this.rating = rating;
-	}
-
-	public ProductModel getProduct() {
-		return productModel;
-	}
-
-	public void setProduct(ProductModel products) {
-		this.productModel = products;
-	}
 }
