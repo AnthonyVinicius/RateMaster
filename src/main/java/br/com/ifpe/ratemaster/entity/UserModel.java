@@ -5,14 +5,10 @@ import lombok.*;
 
 @Entity
 @Table(name = "tb_user")
-@Getter
-@Builder
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Data
 public class UserModel {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     private String name;

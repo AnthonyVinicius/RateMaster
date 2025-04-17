@@ -4,11 +4,7 @@ import lombok.*;
 
 @Entity
 @Table(name = "tb_review")
-@Builder
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Data
 public class ReviewModel {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

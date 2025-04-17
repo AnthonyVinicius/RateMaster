@@ -5,11 +5,7 @@ import lombok.*;
 import java.util.List;
 
 @Entity
-@Getter
-@Setter
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 @Table(name = "tb_products")
 public class ProductModel {
 	@Id
@@ -26,9 +22,9 @@ public class ProductModel {
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "shop_id")
-	private ShopModel shop;
+	private ShopModel shopModel;
 
-	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "productModel", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<ReviewModel> reviewModels;
 
 

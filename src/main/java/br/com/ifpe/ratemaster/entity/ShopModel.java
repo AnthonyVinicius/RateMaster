@@ -6,21 +6,16 @@ import java.util.List;
 
 @Entity
 @Table(name = "tb_shop")
-@Getter
-@Builder
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Data
 public class ShopModel {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Id;
     private String email;
     private String name;
     private String userType;
 
-    @OneToMany(mappedBy = "shop", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
-    private List<ProductModel> products;
+    @OneToMany(mappedBy = "shopModel", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    private List<ProductModel> productsModel;
 
 }
