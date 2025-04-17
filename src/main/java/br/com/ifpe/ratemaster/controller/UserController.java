@@ -1,6 +1,5 @@
 package br.com.ifpe.ratemaster.controller;
 
-import br.com.ifpe.ratemaster.entity.ShopModel;
 import br.com.ifpe.ratemaster.entity.UserModel;
 import br.com.ifpe.ratemaster.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +28,7 @@ public class UserController {
     }
 
     @PostMapping("/registerUser")
-    private UserModel registerUser(@RequestBody UserModel userModel){
+    private UserModel registerUser(@RequestBody UserModel userModel) {
         return service.saveUser(userModel);
     }
 
@@ -41,4 +40,17 @@ public class UserController {
         }
         return ResponseEntity.notFound().build();
     }
+
+//    @PutMapping("/{id}")
+//    public ResponseEntity<UserModel> updateUser(@PathVariable Long id, @RequestBody UserModel userModel) {
+//        return service.findById(id)
+//                    .map(newUser -> {
+//                        newUser.setName(userModel.getName());
+//                        newUser.setEmail(userModel.getEmail());
+//
+//                        UserModel updatedUser = service.saveUser(newUser);
+//                        return ResponseEntity.ok(updatedUser);
+//                    })
+//                .orElse(ResponseEntity.notFound().build());
+//    }
 }
