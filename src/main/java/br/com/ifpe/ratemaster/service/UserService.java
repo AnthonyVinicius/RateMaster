@@ -12,17 +12,13 @@ import java.util.UUID;
 @Service
 public class UserService {
     @Autowired
-    private UserRepository repository;
+    private UserRepository userRepository;
 
-    public List<UserModel> listAll(){
-        return repository.findAll();
-    }
+    public List<UserModel> listAll() {return userRepository.findAll();}
 
-    public Optional<UserModel> findById(Long id){
-        return repository.findById(id);
-    }
+    public UserModel saveUser(UserModel usermodel) {return userRepository.save(usermodel);}
 
-    public void delete(Long id){
-        repository.deleteById(id);
-    }
+    public Optional<UserModel> findById(Long id) {return userRepository.findById(id);}
+
+    public void delete(Long id) {userRepository.deleteById(id);}
 }
