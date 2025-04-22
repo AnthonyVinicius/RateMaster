@@ -1,10 +1,8 @@
 package br.com.ifpe.ratemaster.entity;
 import jakarta.persistence.*;
-import lombok.*;
 
 @Entity
 @Table(name = "tb_review")
-@Data
 public class ReviewModel {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,4 +16,51 @@ public class ReviewModel {
 	@JoinColumn(name = "product_id")
 	private ProductModel productModel;
 
+	public ReviewModel(String comment, Long id, String name, ProductModel productModel, Integer rating) {
+		this.comment = comment;
+		this.id = id;
+		this.name = name;
+		this.productModel = productModel;
+		this.rating = rating;
+	}
+
+	public ReviewModel() {
+
+	}
+
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public ProductModel getProductModel() {
+		return productModel;
+	}
+
+	public void setProductModel(ProductModel productModel) {
+		this.productModel = productModel;
+	}
+
+	public Integer getRating() {
+		return rating;
+	}
+
+	public void setRating(Integer rating) {
+		this.rating = rating;
+	}
 }

@@ -1,11 +1,8 @@
 package br.com.ifpe.ratemaster.entity;
 import jakarta.persistence.*;
-import lombok.*;
-
 import java.util.List;
 
 @Entity
-@Data
 @Table(name = "tb_products")
 public class ProductModel {
 	@Id
@@ -27,5 +24,68 @@ public class ProductModel {
 	@OneToMany(mappedBy = "productModel", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<ReviewModel> reviewModels;
 
+	public ProductModel(BrandModel brandModel, String description, long id, String name, Double price, List<ReviewModel> reviewModels, ShopModel shopModel) {
+		this.brandModel = brandModel;
+		this.description = description;
+		this.id = id;
+		this.name = name;
+		this.price = price;
+		this.reviewModels = reviewModels;
+		this.shopModel = shopModel;
+	}
 
+	public ProductModel() {
+	}
+
+	public BrandModel getBrandModel() {
+		return brandModel;
+	}
+
+	public void setBrandModel(BrandModel brandModel) {
+		this.brandModel = brandModel;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public long getId() {
+		return id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public Double getPrice() {
+		return price;
+	}
+
+	public void setPrice(Double price) {
+		this.price = price;
+	}
+
+	public List<ReviewModel> getReviewModels() {
+		return reviewModels;
+	}
+
+	public void setReviewModels(List<ReviewModel> reviewModels) {
+		this.reviewModels = reviewModels;
+	}
+
+	public ShopModel getShopModel() {
+		return shopModel;
+	}
+
+	public void setShopModel(ShopModel shopModel) {
+		this.shopModel = shopModel;
+	}
 }
