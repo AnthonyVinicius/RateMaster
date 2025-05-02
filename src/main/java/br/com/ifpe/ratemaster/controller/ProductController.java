@@ -1,6 +1,7 @@
 package br.com.ifpe.ratemaster.controller;
 
 import br.com.ifpe.ratemaster.entity.ProductModel;
+import br.com.ifpe.ratemaster.repository.ProductRepository;
 import br.com.ifpe.ratemaster.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -36,4 +37,8 @@ public class ProductController {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
+
+//    @GetMapping("/category/{name}")
+//    private List<ProductModel> findByCategory(@PathVariable String name) {
+//        return productService.findProductByCategory(name);}
 }

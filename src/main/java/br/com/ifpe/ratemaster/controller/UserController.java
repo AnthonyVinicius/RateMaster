@@ -27,7 +27,7 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/registerUser")
+    @PostMapping
     private UserModel registerUser(@RequestBody UserModel userModel) {
         return service.saveUser(userModel);
     }
