@@ -27,7 +27,7 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/registerUser")
+    @PostMapping
     private UserModel registerUser(@RequestBody UserModel userModel) {
         return service.saveUser(userModel);
     }
@@ -41,16 +41,16 @@ public class UserController {
         return ResponseEntity.notFound().build();
     }
 
-//    @PutMapping("/{id}")
-//    public ResponseEntity<UserModel> updateUser(@PathVariable Long id, @RequestBody UserModel userModel) {
-//        return service.findById(id)
-//                    .map(newUser -> {
-//                        newUser.setName(userModel.getName());
-//                        newUser.setEmail(userModel.getEmail());
-//
-//                        UserModel updatedUser = service.saveUser(newUser);
-//                        return ResponseEntity.ok(updatedUser);
-//                    })
-//                .orElse(ResponseEntity.notFound().build());
-//    }
+    @PutMapping("/{id}")
+    public ResponseEntity<UserModel> updateUser(@PathVariable Long id, @RequestBody UserModel userModel) {
+        return service.findById(id)
+                    .map(newUser -> {
+                        newUser.setName(userModel.getName());
+                        newUser.setEmail(userModel.getEmail());
+
+                        UserModel updatedUser = service.saveUser(newUser);
+                        return ResponseEntity.ok(updatedUser);
+                    })
+                .orElse(ResponseEntity.notFound().build());
+    }
 }
