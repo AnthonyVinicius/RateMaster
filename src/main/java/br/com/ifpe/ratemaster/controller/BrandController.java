@@ -30,12 +30,12 @@ public class BrandController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/registerBrand")
+    @PostMapping("/register")
     public BrandModel registerBrand(@RequestBody BrandModel brandModel) {
         return brandService.saveBrand(brandModel);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteBrandById(@PathVariable Long id) {
         brandService.deleteBrand(id);
         return ResponseEntity.noContent().build();
