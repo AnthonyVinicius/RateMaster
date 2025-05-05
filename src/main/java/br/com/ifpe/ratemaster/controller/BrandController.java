@@ -11,31 +11,34 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/brand")
+@CrossOrigin(origins = "http://localhost:5173")
+@RequestMapping("/api/brand")
 public class BrandController {
+
     @Autowired
     private BrandService brandService;
 
     @GetMapping
-    private List<BrandModel> listAllBrands(){
+    public List<BrandModel> listAllBrands() {
         return brandService.listAllBrands();
     }
 
     @GetMapping("/{id}")
-    private ResponseEntity findBrandById(@PathVariable Long id){
+    public ResponseEntity<BrandModel> findBrandById(@PathVariable Long id) {
         return brandService.findBrandById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    private BrandModel registerBrand(@RequestBody BrandModel brandModel){
+    @PostMapping("/registerBrand")
+    public BrandModel registerBrand(@RequestBody BrandModel brandModel) {
         return brandService.saveBrand(brandModel);
     }
 
     @DeleteMapping("/{id}")
-    private ResponseEntity<Void> deleteBrandById(@PathVariable Long id){
+    public ResponseEntity<Void> deleteBrandById(@PathVariable Long id) {
         brandService.deleteBrand(id);
         return ResponseEntity.noContent().build();
     }
 }
+

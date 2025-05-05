@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping ("/shop")
+@CrossOrigin(origins = "http://localhost:5173")
+@RequestMapping ("/api/shop")
 public class ShopController {
 
     @Autowired
@@ -27,7 +28,7 @@ public class ShopController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
+    @PostMapping("/registerShop")
     private ShopModel registerShop(@RequestBody ShopModel shopModel){
         return shopService.saveShop(shopModel);
     }
