@@ -27,12 +27,12 @@ public class ReviewController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
+    @PostMapping("/register")
     private ReviewModel registerReview(@RequestBody ReviewModel reviewModel){
         return reviewService.saveReview(reviewModel);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     private ResponseEntity<Void> deleteReviewById(@PathVariable Long id){
         reviewService.deleteReview(id);
         return ResponseEntity.noContent().build();

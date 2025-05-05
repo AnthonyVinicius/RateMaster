@@ -28,12 +28,12 @@ public class ProductController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/registerProduct")
+    @PostMapping("/register")
     private ProductModel registerProduct(@RequestBody ProductModel productModel){
         return productService.saveProduct(productModel);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     private ResponseEntity<Void> deleteProductById(@PathVariable Long id){
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();

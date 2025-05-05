@@ -28,12 +28,12 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
+    @PostMapping("/register")
     private UserModel registerUser(@RequestBody UserModel userModel) {
         return service.saveUser(userModel);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteUserById(@PathVariable Long id) {
         if (service.findById(id).isPresent()) {
             service.delete(id);
@@ -42,7 +42,7 @@ public class UserController {
         return ResponseEntity.notFound().build();
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<UserModel> updateUser(@PathVariable Long id, @RequestBody UserModel userModel) {
         return service.findById(id)
                     .map(newUser -> {

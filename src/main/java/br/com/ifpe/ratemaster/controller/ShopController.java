@@ -28,12 +28,12 @@ public class ShopController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/registerShop")
+    @PostMapping("/register")
     private ShopModel registerShop(@RequestBody ShopModel shopModel){
         return shopService.saveShop(shopModel);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     private ResponseEntity<Void> deleteShopById(@PathVariable Long id){
         shopService.deleteShop(id);
         return ResponseEntity.noContent().build();

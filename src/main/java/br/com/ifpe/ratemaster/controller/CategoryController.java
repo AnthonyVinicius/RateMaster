@@ -12,6 +12,7 @@ import java.util.List;
 @RequestMapping("/api/category")
 @CrossOrigin(origins = "http://localhost:5173")
 public class CategoryController {
+
     @Autowired
     private CategoryService categoryService;
 
@@ -25,10 +26,10 @@ public class CategoryController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
+    @PostMapping("/register")
     private CategoryModel registerCategory(@RequestBody CategoryModel categoryModel) { return categoryService.saveCategory(categoryModel);}
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     private ResponseEntity<Void> deleteCategoryById(@PathVariable Long id){
         categoryService.deleteCategory(id);
         return ResponseEntity.noContent().build();
