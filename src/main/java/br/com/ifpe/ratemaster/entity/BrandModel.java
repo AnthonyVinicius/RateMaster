@@ -1,4 +1,5 @@
 package br.com.ifpe.ratemaster.entity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -11,6 +12,7 @@ public class BrandModel {
     private String name;
 
     @OneToMany(mappedBy = "brandModel", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<ProductModel> productModels;
 
     public BrandModel(long id, String name, List<ProductModel> productModels) {
