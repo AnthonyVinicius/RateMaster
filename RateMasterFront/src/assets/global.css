@@ -1,0 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Tauri&display=swap');
+
+:root{
+    --background: #f8f9fa;
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    font-family: "Tauri";
+  }
+
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--background);
+}
+
+.content {
+  flex: 1;
+}
+
+.tauri-regular {
+  font-family: "Tauri", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
