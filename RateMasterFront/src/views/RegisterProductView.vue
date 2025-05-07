@@ -16,7 +16,7 @@ const product = ref({
   description: '',
   price: '',
   brandModel: '',
-  shopModel: '',
+  shopModel:'',
   categoryModel: '',
 });
 
@@ -46,16 +46,26 @@ onMounted(() => {
   loadCategories();
 });
 
-const submit = async () => {
-  console.log(product.value.brand)
-  product.value.idShop = userData.value.id;
-  product.value.name = product.value.name.trim();
-  product.value.description = product.value.description.trim();
-  product.value.price = parseFloat(product.value.price)
-  product.value.brandModel = typeof product.value.brandModel === 'string' ? product.value.brand.trim() : '';
-  product.value.categoryModel = typeof product.value.categoryModel === 'string' ? product.value.category.trim() : '';
 
-  await daoProducts.insert(product.value);
+const submit = async () => {
+
+  const name = product.value.name.trim();
+  const description = product.value.description.trim();
+  const price = parseFloat(product.value.price);
+  const brandModel = product.value.brandModel;
+  const shopModel = 1;
+  const categoryModel = product.value.categoryModel;
+
+  const productData = {
+    name,
+    description,
+    price,
+    brandModel,
+    shopModel,
+    categoryModel
+  };
+
+  await daoProducts.insert(productData);
   triggerAlert('Produto registrado com sucesso!', 'success');
 
   product.value = {
@@ -69,10 +79,9 @@ const submit = async () => {
 };
 
 const formatPrice = (event) => {
-  let value = event.target.value.replace(/[^\d]/g, '');  // Remove tudo que não for número
-  const numericValue = Number(value) / 100;  // Converte para valor numérico (centavos)
+  let value = event.target.value.replace(/[^\d]/g, ''); 
+  const numericValue = Number(value) / 100;
 
-  // Atualiza o valor de price com o formato correto
   product.value.price = numericValue || '';
 };
 </script>
@@ -114,7 +123,6 @@ const formatPrice = (event) => {
           </div>
         </div>
 
-        <!-- Formulário de Registro do Produto -->
         <div class="col-12 col-lg-7">
           <div class="card border-0 shadow-sm">
             <div class="card-body p-4">
