@@ -17,22 +17,31 @@ public class CategoryController {
     private CategoryService categoryService;
 
     @GetMapping
-    private List<CategoryModel> listAllCategories() { return categoryService.listAllCategories();}
+    public List<CategoryModel> listAllCategories() { return categoryService.listAllCategories();}
 
     @GetMapping("/{id}")
-    private ResponseEntity findCategoryById(@PathVariable Long id){
+    public ResponseEntity findCategoryById(@PathVariable Long id){
         return categoryService.findCategoryById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/register")
-    private CategoryModel registerCategory(@RequestBody CategoryModel categoryModel) { return categoryService.saveCategory(categoryModel);}
+    public CategoryModel registerCategory(@RequestBody CategoryModel categoryModel) { return categoryService.saveCategory(categoryModel);}
 
     @DeleteMapping("/delete/{id}")
-    private ResponseEntity<Void> deleteCategoryById(@PathVariable Long id){
+    public ResponseEntity<Void> deleteCategoryById(@PathVariable Long id){
         categoryService.deleteCategory(id);
         return ResponseEntity.noContent().build();
     }
+    @PutMapping("/update/{id}")
+    public ResponseEntity<CategoryModel> updateCategory(@PathVariable Long id, @RequestBody CategoryModel categoryModel){
+        return categoryService.findCategoryById(id)
+                .map(newCategory ->{
+                    newCategory.setName(categoryModel.getName());
 
+                    CategoryModel updatedCategory = categoryService.saveCategory(newCategory);
+                    return ResponseEntity.ok(updatedCategory);
+                }).orElse(ResponseEntity.notFound().build());
+    }
 }

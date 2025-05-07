@@ -14,6 +14,7 @@ const router = createRouter({
 
     { path: '/registerProduct', name: 'registerProduct', meta: { requireAuth: true, requireShop: true }, component: () => import('../views/RegisterProductView.vue') },
     { path: '/brand', name: 'brands', meta: { requireAuth: true, requireShop: true }, component: () => import('../views/BrandView.vue') },
+    { path: '/category', name: 'categories', meta: {requireAuth: true, requireShop: true}, component: () => import('../views/CategoryView.vue')},
     { path: '/updateProducts/:id', name: 'updateProducts', meta: { requireAuth: true, requireShop: true }, component: () => import('../views/UpdateProductsView.vue') },
 
     { path: '/product/:id', name: 'productDetail', meta: { requireAuth: true }, component: () => import('../views/ProductDetailsView.vue') },

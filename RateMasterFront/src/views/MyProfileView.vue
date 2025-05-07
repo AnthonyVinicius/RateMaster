@@ -164,6 +164,9 @@ onMounted(() => {
         <RouterLink to="/brand">
           <CustomButton><i class="bi bi-plus-circle"></i> Nova Marca</CustomButton>
         </RouterLink>
+        <RouterLink to="/category">
+          <CustomButton><i class="bi bi-plus-circle"></i> Nova Categoria</CustomButton>
+        </RouterLink>
         <RouterLink to="/registerProduct">
           <CustomButton><i class="bi bi-box-seam"></i> Novo produto</CustomButton>
         </RouterLink>

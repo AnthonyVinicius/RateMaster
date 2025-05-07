@@ -21,4 +21,4 @@ public class CategoryService {
     public Optional<CategoryModel> findCategoryById(Long id) {return categoryRepository.findById(id);}
 
     public void deleteCategory(Long id) {categoryRepository.deleteById(id);}
-}
+    }
