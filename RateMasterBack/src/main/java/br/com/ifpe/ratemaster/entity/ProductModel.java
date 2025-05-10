@@ -12,6 +12,7 @@ public class ProductModel {
 	private String name;
 	private String description;
 	private Double price;
+	private String image;
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "brand_id")
@@ -28,7 +29,7 @@ public class ProductModel {
 	@OneToMany(mappedBy = "productModel", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<ReviewModel> reviewModels;
 
-	public ProductModel(BrandModel brandModel, String description, long id, String name, Double price, List<ReviewModel> reviewModels, ShopModel shopModel, CategoryModel categoryModel) {
+	public ProductModel(BrandModel brandModel, String description, long id, String name, Double price, List<ReviewModel> reviewModels, ShopModel shopModel, CategoryModel categoryModel, String image) {
 		this.brandModel = brandModel;
 		this.description = description;
 		this.id = id;
@@ -37,6 +38,7 @@ public class ProductModel {
 		this.reviewModels = reviewModels;
 		this.shopModel = shopModel;
 		this.categoryModel = categoryModel;
+		this.image = image;
 	}
 
 	public ProductModel() {
@@ -97,4 +99,8 @@ public class ProductModel {
 	public CategoryModel getCategoryModel() {return categoryModel;}
 
 	public void setCategoryModel(CategoryModel categoryModel) {this.categoryModel = categoryModel;}
+
+	public String getImage() {return image;}
+
+	public void setImage(String image) {this.image = image;}
 }

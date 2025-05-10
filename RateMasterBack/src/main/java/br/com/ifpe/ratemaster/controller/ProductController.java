@@ -58,6 +58,7 @@ public class ProductController {
         product.setBrandModel(brand);
         product.setShopModel(shop);
         product.setCategoryModel(category);
+        product.setImage(dto.image);
 
         return productService.saveProduct(product);
     }

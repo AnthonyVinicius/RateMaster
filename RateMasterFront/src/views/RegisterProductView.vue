@@ -2,14 +2,13 @@
 import CustomButton from '@/components/CustomButton.vue';
 import GenericDAO from '@/services/GenericDAO';
 import { Form, Field, ErrorMessage } from 'vee-validate';
-import { ref, onMounted, inject } from 'vue';
+import { ref, onMounted} from 'vue';
 import { useRouter } from "vue-router";
 
 const router = useRouter();
 const daoProducts = new GenericDAO('product');
 const daoBrands = new GenericDAO('brand');
 const daoCategories = new GenericDAO('category');
-const userData = inject('userData');
 
 const product = ref({
   name: '',
@@ -18,6 +17,7 @@ const product = ref({
   brandModel: '',
   shopModel:'',
   categoryModel: '',
+  image: ''
 });
 
 const brands = ref([]);
@@ -52,6 +52,7 @@ const submit = async () => {
   const name = product.value.name.trim();
   const description = product.value.description.trim();
   const price = parseFloat(product.value.price);
+  const image = product.value.image;
   const brandModel = product.value.brandModel;
   const shopModel = 1;
   const categoryModel = product.value.categoryModel;
@@ -60,6 +61,7 @@ const submit = async () => {
     name,
     description,
     price,
+    image,
     brandModel,
     shopModel,
     categoryModel
@@ -72,9 +74,10 @@ const submit = async () => {
     name: '',
     description: '',
     price: '',
+    image: '',
     brandModel: '',
     shopModel: '',
-    categoryModel: '',
+    categoryModel: ''
   };
 };
 
