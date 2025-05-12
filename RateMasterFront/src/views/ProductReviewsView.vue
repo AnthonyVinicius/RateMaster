@@ -24,9 +24,15 @@ const fetchProducts = async () => {
         reviews.value = await daoReviews.getAll();
 
         products.value.forEach(product => {
-            const productReviews = reviews.value.filter(review => review.productId === product.id);
+            const productReviews = product.reviewModels || [];
 
             const totalRating = productReviews.reduce((sum, review) => sum + review.rating, 0);
+
+            if (productReviews.length > 0) {
+                product.averageRating = (totalRating / productReviews.length).toFixed(1);
+            } else {
+                product.averageRating = 0;
+            }
 
             const company = companies.value.find(company => company.id === product.shopModel.id);
             product.companyName = company ? company.name : 'Empresa desconhecida';

@@ -1,4 +1,5 @@
 package br.com.ifpe.ratemaster.entity;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -11,17 +12,20 @@ public class ReviewModel {
 	private String name;
 	private String comment;
 	private Integer rating;
+	private String createdAt;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "product_id")
+	@JsonBackReference
 	private ProductModel productModel;
 
-	public ReviewModel(String comment, Long id, String name, ProductModel productModel, Integer rating) {
+	public ReviewModel(String comment, Long id, String name, ProductModel productModel, Integer rating, String createdAt) {
 		this.comment = comment;
 		this.id = id;
 		this.name = name;
 		this.productModel = productModel;
 		this.rating = rating;
+		this.createdAt = createdAt;
 	}
 
 	public ReviewModel() {
@@ -60,7 +64,9 @@ public class ReviewModel {
 		return rating;
 	}
 
-	public void setRating(Integer rating) {
-		this.rating = rating;
-	}
+	public void setRating(Integer rating) {this.rating = rating;}
+
+	public String getCreatedAt() {return createdAt;}
+
+	public void setCreatedAt(String createdAt) {this.createdAt = createdAt;}
 }

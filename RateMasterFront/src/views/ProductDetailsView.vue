@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, inject } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import CustomButton from "@/components/CustomButton.vue";
 import { Form, Field, ErrorMessage } from 'vee-validate';
@@ -12,8 +12,9 @@ const averageRating = ref(0);
 const daoProducts = new GenericDAO("product");
 const daoReviews = new GenericDAO("review");
 const daoShops = new GenericDAO('shop');
-const userData = inject('userData');
+const daoUser = new GenericDAO('user');
 
+const userData = ref(null);
 const product = ref(null);
 const reviews = ref([]);
 const newReview = ref({ rating: "", comment: "" });
@@ -45,21 +46,20 @@ const fetchProductDetails = async () => {
     const productId = route.params.id;
     product.value = await daoProducts.getById(productId);
 
-    //mudar essa logica
-/*     reviews.value = (await daoReviews.search("productId", productId)) || [];
+    userData.value = await daoUser.getById(1); // exemplo fixo
 
-    reviews.value.forEach(review => {
-      responseStates.value[review.id] = { comment: "" };
-    });
+    const allReviews = await daoReviews.getAll();
+
+    const reviewIdsFromProduct = product.value.reviewModels.map(review => review.id);
+    reviews.value = allReviews.filter(review => reviewIdsFromProduct.includes(review.id));
 
     if (reviews.value.length > 0) {
       averageRating.value = (
-        reviews.value.reduce((sum, review) => sum + review.rating, 0) /
-        reviews.value.length
+        reviews.value.reduce((sum, review) => sum + review.rating, 0) / reviews.value.length
       ).toFixed(1);
     } else {
-      averageRating.value = 0; */
-   /*  } */
+      averageRating.value = 0;
+    }
 
     const company = await daoShops.getById(product.value.shopModel.id);
     product.value.companyName = company ? company.name : 'Empresa desconhecida';
@@ -73,11 +73,12 @@ const submitReview = async () => {
   const review = {
     productId: product.value.id,
     userId: userData.value.id,
-    userName: userData.value.name,
+    name: userData.value.name,
     rating: Number(newReview.value.rating),
     comment: newReview.value.comment,
     createdAt: new Date().toISOString()
   };
+
 
   try {
     await daoReviews.insert(review);
@@ -93,6 +94,7 @@ const submitReview = async () => {
     newReview.value.rating = "";
 
     triggerAlert('Avaliação enviada com sucesso!', 'success');
+    console.log(review);
   } catch (error) {
     console.log(userData.value);
     console.error("Erro ao enviar avaliação:", error);
@@ -124,8 +126,8 @@ const submitResponse = async (review, values, { resetForm }) => {
   }
 };
 
-onMounted(() => {
-  fetchProductDetails();
+onMounted(async () => {
+    fetchProductDetails();
 });
 </script>
 
@@ -167,7 +169,7 @@ onMounted(() => {
       </div>
     </div>
 
-    <div v-if="userData.userType === 'individual'" class="mt-5">
+    <div v-if="userData && userData.userType === 'user'" class="mt-5">
       <Form @submit="submitReview" class="card p-5 shadow-sm">
         <h3 class="fw-bold mb-3">Deixe sua avaliação</h3>
         <div class="mb-3">
@@ -219,7 +221,7 @@ onMounted(() => {
                     <i class="bi bi-star-fill" v-for="n in review.rating" :key="n"></i>
                   </div>
 
-                  <div class="ms-auto text-secondary">{{ review.userName }}</div>
+                  <div class="ms-auto text-secondary">{{ review.name }}</div>
                 </div>
                 <div class="text-muted small">
                   <i class="bi bi-clock me-1"></i>

@@ -1,4 +1,6 @@
 package br.com.ifpe.ratemaster.entity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -26,7 +28,8 @@ public class ProductModel {
 	@JoinColumn(name = "category_id")
 	private CategoryModel categoryModel;
 
-	@OneToMany(mappedBy = "productModel", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "productModel", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@JsonManagedReference
 	private List<ReviewModel> reviewModels;
 
 	public ProductModel(BrandModel brandModel, String description, long id, String name, Double price, List<ReviewModel> reviewModels, ShopModel shopModel, CategoryModel categoryModel, String image) {

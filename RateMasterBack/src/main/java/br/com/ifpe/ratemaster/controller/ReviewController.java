@@ -1,6 +1,9 @@
 package br.com.ifpe.ratemaster.controller;
 
+import br.com.ifpe.ratemaster.dto.ReviewDTO;
+import br.com.ifpe.ratemaster.entity.ProductModel;
 import br.com.ifpe.ratemaster.entity.ReviewModel;
+import br.com.ifpe.ratemaster.service.ProductService;
 import br.com.ifpe.ratemaster.service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +18,9 @@ public class ReviewController {
     @Autowired
     private ReviewService reviewService;
 
+    @Autowired
+    private ProductService productService;
+
     @GetMapping
     private List<ReviewModel> listAllReviews(){
         return reviewService.listAllReviews();
@@ -28,8 +34,15 @@ public class ReviewController {
     }
 
     @PostMapping("/register")
-    private ReviewModel registerReview(@RequestBody ReviewModel reviewModel){
-        return reviewService.saveReview(reviewModel);
+    private ReviewModel registerReview(@RequestBody ReviewDTO dto){
+        ProductModel product = productService.findProductById(dto.productId).orElseThrow();
+        ReviewModel review = new ReviewModel();
+        review.setName(dto.name);
+        review.setComment(dto.comment);
+        review.setRating(dto.rating);
+        review.setProductModel(product);
+        review.setCreatedAt(dto.createdAt);
+        return reviewService.saveReview(review);
     }
 
     @DeleteMapping("/delete/{id}")
