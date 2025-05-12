@@ -169,7 +169,7 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div v-if="userData && userData.userType === 'user'" class="mt-5">
+    <div v-if="userData && userData.userType === 'individual'" class="mt-5">
       <Form @submit="submitReview" class="card p-5 shadow-sm">
         <h3 class="fw-bold mb-3">Deixe sua avaliação</h3>
         <div class="mb-3">
