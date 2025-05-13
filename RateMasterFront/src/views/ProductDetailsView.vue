@@ -163,7 +163,7 @@ onMounted(async () => {
             </div>
             <p class="text-secondary text-truncate mb-0">{{ product.description }}</p>
             <p class="text-secondary text-truncate mb-0"><i class="bi bi-shop me-1"></i>{{ product.companyName }}</p>
-            <p class="fs-4 fw-bold text-success mb-0">{{ product.price }}</p>
+            <p class="fs-4 fw-bold text-success mb-0">R$ {{ product.price }}</p>
           </div>
         </div>
       </div>
@@ -247,7 +247,7 @@ onMounted(async () => {
                 </div>
               </div>
 
-              <div v-if="userData.userType === 'business' && review.productId && product.idShop === userData.id"
+              <div v-if="userData.userType === 'shop' && review.productId && product.idShop === userData.id"
                 class="bg-light rounded-3 p-4 mt-3">
                 <Form v-slot="{ resetForm }" @submit="values => submitResponse(review, values, { resetForm })">
                   <textarea v-model="responseStates[review.id].comment" class="form-control mb-3" rows="4"

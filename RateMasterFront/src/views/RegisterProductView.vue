@@ -2,7 +2,7 @@
 import CustomButton from '@/components/CustomButton.vue';
 import GenericDAO from '@/services/GenericDAO';
 import { Form, Field, ErrorMessage } from 'vee-validate';
-import { ref, onMounted} from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -13,15 +13,19 @@ const daoCategories = new GenericDAO('category');
 const product = ref({
   name: '',
   description: '',
-  price: '',
+  price: 0,
   brandModel: '',
-  shopModel:'',
+  shopModel: '',
   categoryModel: '',
-  image: ''
+  image: '',
+  type: ''
 });
+
+const priceInput = ref('');
 
 const brands = ref([]);
 const categories = ref([]);
+
 const alertMessage = ref(null);
 const alertType = ref('success');
 const showAlert = ref(false);
@@ -46,16 +50,35 @@ onMounted(() => {
   loadCategories();
 });
 
+const formatPrice = (event) => {
+  let value = event.target.value.replace(/[^\d]/g, '');
+
+  if (value === '') {
+    priceInput.value = '';
+    product.value.price = 0;
+    return;
+  }
+
+  let numericValue = parseFloat(value) / 100;
+
+  priceInput.value = numericValue.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: 2
+  });
+
+  product.value.price = numericValue;
+};
 
 const submit = async () => {
-
   const name = product.value.name.trim();
   const description = product.value.description.trim();
-  const price = parseFloat(product.value.price);
-  const image = product.value.image;
+  const price = product.value.price;
+  const image = product.value.image.trim();
   const brandModel = product.value.brandModel;
   const shopModel = 1;
   const categoryModel = product.value.categoryModel;
+  const type = product.value.type;
 
   const productData = {
     name,
@@ -64,7 +87,8 @@ const submit = async () => {
     image,
     brandModel,
     shopModel,
-    categoryModel
+    categoryModel,
+    type
   };
 
   await daoProducts.insert(productData);
@@ -73,21 +97,17 @@ const submit = async () => {
   product.value = {
     name: '',
     description: '',
-    price: '',
-    image: '',
+    price: 0,
     brandModel: '',
     shopModel: '',
-    categoryModel: ''
+    categoryModel: '',
+    image: '',
+    type: ''
   };
-};
-
-const formatPrice = (event) => {
-  let value = event.target.value.replace(/[^\d]/g, ''); 
-  const numericValue = Number(value) / 100;
-
-  product.value.price = numericValue || '';
+  priceInput.value = '';
 };
 </script>
+
 
 <template>
   <div class="bg-light min-vh-100 py-5">
@@ -159,7 +179,7 @@ const formatPrice = (event) => {
 
                 <div class="row g-3 mb-3">
                   <div class="col-md-6">
-                    <input v-model="product.price" type="text" class="form-control p-3" placeholder="R$ 0,00" required
+                    <input v-model="priceInput" type="text" class="form-control p-3" placeholder="R$ 0,00" required
                       @input="formatPrice" />
                   </div>
 

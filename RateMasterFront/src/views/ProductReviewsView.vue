@@ -144,7 +144,7 @@ onMounted(() => {
                                     </div>
                                     <p class="card-text text-truncate">{{ product.description }}</p>
                                     <div class="hstack d-flex align-items-center">
-                                        <p class="price m-0 text-truncate">{{ product.price }}</p>
+                                        <p class="price m-0 text-truncate">R$ {{ product.price }}</p>
                                         <p class="card-text ms-auto   text-truncate"><strong></strong> {{
                                             product.companyName }}</p>
                                     </div>
