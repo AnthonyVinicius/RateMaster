@@ -1,56 +1,62 @@
 package br.com.ifpe.ratemaster.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Collection;
+import java.util.List;
 
-@Entity
-@Table(name = "tb_user")
-public class UserModel {
+@Table(name = "users")
+@Entity(name = "users")
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(of = "id")
+public class UserModel implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
+    private String login;
+    private String password;
+    private UserRole role;
 
-    private String name;
-
-    private String email;
-
-    private String userType;
-
-    public UserModel(String email, long id, String name, String userType) {
-        this.email = email;
-        this.id = id;
-        this.name = name;
-        this.userType = userType;
+    public UserModel(String login, String password, UserRole role){
+        this.login = login;
+        this.password = password;
+        this.role = role;
     }
 
-    public UserModel() {
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        if(this.role == UserRole.BUSINESS) return List.of(new SimpleGrantedAuthority("ROLE_BUSINESS"), new SimpleGrantedAuthority("ROLE_INDIVIDUAL"));
+        else return List.of(new SimpleGrantedAuthority("ROLE_INDIVIDUAL"));
     }
 
-    public String getEmail() {
-        return email;
+    @Override
+    public String getUsername() {
+        return login;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
     }
 
-    public long getId() {
-        return id;
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
     }
 
-    public String getName() {
-        return name;
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getUserType() {
-        return userType;
-    }
-
-    public void setUserType(String userType) {
-        this.userType = userType;
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }

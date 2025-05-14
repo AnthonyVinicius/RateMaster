@@ -9,6 +9,8 @@ public class BrandModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    @Column(unique = true)
     private String name;
 
     @OneToMany(mappedBy = "brandModel", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

@@ -7,6 +7,7 @@ import br.com.ifpe.ratemaster.service.ProductService;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,6 +33,7 @@ public class BrandController {
     }
 
     @PostMapping("/register")
+    @PreAuthorize("hasRole('BUSINESS')")
     public BrandModel registerBrand(@RequestBody BrandModel brandModel) {
         return brandService.saveBrand(brandModel);
     }
