@@ -1,5 +1,5 @@
+/*
 package br.com.ifpe.ratemaster.entity;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.List;
@@ -22,7 +22,7 @@ public class ProductModel {
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "shop_id")
-	private ShopModel shopModel;
+	private ShopModel userModel;
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "category_id")
@@ -39,7 +39,7 @@ public class ProductModel {
 		this.name = name;
 		this.price = price;
 		this.reviewModels = reviewModels;
-		this.shopModel = shopModel;
+		this.userModel = shopModel;
 		this.categoryModel = categoryModel;
 		this.image = image;
 	}
@@ -91,12 +91,12 @@ public class ProductModel {
 		this.reviewModels = reviewModels;
 	}
 
-	public ShopModel getShopModel() {
-		return shopModel;
+	public ShopModel getUserModel() {
+		return userModel;
 	}
 
-	public void setShopModel(ShopModel shopModel) {
-		this.shopModel = shopModel;
+	public void setUserModel(ShopModel userModel) {
+		this.userModel = userModel;
 	}
 
 	public CategoryModel getCategoryModel() {return categoryModel;}
@@ -107,3 +107,4 @@ public class ProductModel {
 
 	public void setImage(String image) {this.image = image;}
 }
+*/

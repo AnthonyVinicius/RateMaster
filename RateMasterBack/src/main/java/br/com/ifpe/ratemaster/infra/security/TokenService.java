@@ -22,7 +22,9 @@ public class TokenService {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             String token = JWT.create()
                     .withIssuer("ratemaster")
-                    .withSubject(user.getLogin())
+                    .withSubject(user.getEmail())
+                    .withClaim("role", user.getRole().getRole())
+                    .withClaim("id", user.getId())
                     .withExpiresAt(genExpirationDate())
                     .sign(algorithm);
             return token;
@@ -40,7 +42,7 @@ public class TokenService {
                     .verify(token)
                     .getSubject();
         } catch (JWTVerificationException exception){
-            return "";
+            return null;
         }
     }
 

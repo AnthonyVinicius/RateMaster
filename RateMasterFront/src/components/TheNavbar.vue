@@ -1,28 +1,16 @@
 <script setup>
-import { inject, ref } from 'vue';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { auth } from '@/firebase.js';
 import CustomButton from './CustomButton.vue';
 import { useRouter } from 'vue-router';
+import AuthService, { authState } from '@/services/AuthService';
+import { computed } from 'vue';
 
+const isLogged = computed(() => authState.isLogged);
+const userType = computed(() => authState.userRole);
 const router = useRouter();
-
-const isLogged = ref(false);
-
-const userData = inject('userData');
-
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    isLogged.value = true;
-  } else {
-    isLogged.value = false;
-  }
-});
-
 
 const handleSignOut = async () => {
   try {
-    await signOut(auth);
+    await AuthService.logout();
     router.push("/");
   } catch (error) {
     console.error("Erro ao sair:", error);
@@ -55,7 +43,7 @@ const handleSignOut = async () => {
               <i class="bi bi-star-fill p-2"></i>Avaliações
             </RouterLink>
           </li>
-          <li class="nav-item" v-if="isLogged && userData?.userType !== 'individual'">
+          <li class="nav-item" v-if="isLogged && userType !== 'individual'">
             <RouterLink class="nav-link text-white" to="/registerProduct">
               <i class="bi bi-plus-square-fill p-2"></i>Registrar Produto
             </RouterLink>

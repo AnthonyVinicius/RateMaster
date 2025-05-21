@@ -1,28 +1,43 @@
 <script setup>
 import CustomButton from '@/components/CustomButton.vue';
 import { ref } from "vue";
+import AuthService from '@/services/AuthService';
 import { useRouter } from "vue-router";
-import LoginService from '@/services/LoginService'
+import GenericDAO from '@/services/GenericDAO';
 import { Form, Field, ErrorMessage } from 'vee-validate';
 
+const errMsg = ref("");
 const router = useRouter();
 const email = ref("");
 const password = ref("");
 const showPassword = ref(false);
+const daoUser = new GenericDAO('user');
+const user = ref({});
 
-const loginService = new LoginService();
 
+const handleLogin = async () => {
+  errMsg.value = '';
+  user.value = {
+    email: email.value.trim(),
+    password: password.value.trim(),
+  };
 
-const handleLogin = () => {
-  loginService.login(email.value, password.value)
-  .then(result => {
-    alert('Login Realizado com Sucesso')
-    router.push('/')
-  }).catch(error => {
-    alert('Email e/ou senha invalido(s)')
-  });
+  try {
+    const response = await daoUser.login(user.value);
+    const token = response.token || (response.data && response.data.token);
+
+    if (token) {
+      AuthService.login(token);
+      console.log('Token salvo e estado atualizado:', token);
+      router.push('/');
+    } else {
+      errMsg.value = 'Token não recebido da API.';
+    }
+  } catch (error) {
+    console.error(error);
+    errMsg.value = 'Erro no login: ' + (error.response?.data?.message || error.message || 'Erro desconhecido');
+  }
 };
-
 const toggleShowPassword = () => {
   showPassword.value = !showPassword.value;
 };

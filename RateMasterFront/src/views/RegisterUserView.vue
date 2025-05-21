@@ -5,7 +5,6 @@ import { useRouter } from 'vue-router';
 import { Form, Field, ErrorMessage } from 'vee-validate';
 import GenericDAO from '@/services/GenericDAO';
 
-const daoShop = new GenericDAO('shop');
 const daoUser = new GenericDAO('user');
 const router = useRouter();
 const user = ref("{}");
@@ -14,30 +13,23 @@ const email = ref("");
 const password = ref("");
 const confirmPassword = ref("");
 const showPassword = ref(false);
-const userType = ref("individual");
+const role = ref("INDIVIDUAL");
 
 const createUser = () => {
   user.value = {
     name: name.value.trim(),
     email: email.value.trim(),
     password: password.value.trim(),
-    userType: userType.value.trim()
+    role: role.value.trim()
   };
   if (password.value !== confirmPassword.value) {
     alert("As senhas não coincidem. Por favor, verifique.");
     return;
   }
   try {
-
-    if (userType.value === "individual") {
-      daoUser.insert(user.value);
-
-    } else {
-      daoShop.insert(user.value);
-
-    };
+    daoUser.insert(user.value);
     alert("Cadastro realizado com sucesso!");
-    router.push('/');
+    router.push('/login');
 
   } catch (error) {
     console.error(error);
@@ -65,9 +57,9 @@ const toggleShowPassword = () => {
                 <Form @submit="createUser">
                   <div class="mb-3">
                     <label class="form-label">Tipo de Conta</label>
-                    <select v-model="userType" class="form-select">
-                      <option value="individual">Pessoa Física</option>
-                      <option value="business">Pessoa Jurídica</option>
+                    <select v-model="role" class="form-select">
+                      <option value="INDIVIDUAL">Pessoa Física</option>
+                      <option value="BUSINESS">Pessoa Jurídica</option>
                     </select>
                   </div>
 
@@ -123,7 +115,7 @@ const toggleShowPassword = () => {
 
                   <div class="mb-3">
                     <label class="form-label">
-                      {{ userType === 'individual' ? 'Nome Completo' : 'Nome da Empresa' }}
+                      {{ role === 'INDIVIDUAL' ? 'Nome Completo' : 'Nome da Empresa' }}
                     </label>
                     <Field v-model="name" name="name" id="name" rules="required|min:5|max:100"
                       v-slot="{ field, errors, meta }">
@@ -131,7 +123,7 @@ const toggleShowPassword = () => {
                         'form-control': true,
                         'is-valid': meta.touched && !errors.length,
                         'is-invalid': meta.touched && errors.length
-                      }" :placeholder="userType === 'individual' ? 'Seu nome completo' : 'Nome da empresa'" />
+                      }" :placeholder="role === 'INDIVIDUAL' ? 'Seu nome completo' : 'Nome da empresa'" />
                     </Field>
                     <ErrorMessage name="name" class="errorMessage" />
                   </div>

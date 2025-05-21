@@ -1,3 +1,4 @@
+/*
 package br.com.ifpe.ratemaster.service;
 
 import br.com.ifpe.ratemaster.entity.ProductModel;
@@ -23,3 +24,4 @@ public class ProductService {
     public List<ProductModel> findProductByCategory(String name) {return productRepository.findByCategoryModelName(name); }
 
 }
+ */

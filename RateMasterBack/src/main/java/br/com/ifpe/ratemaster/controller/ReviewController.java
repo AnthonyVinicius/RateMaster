@@ -1,3 +1,4 @@
+/*
 package br.com.ifpe.ratemaster.controller;
 
 import br.com.ifpe.ratemaster.dto.ReviewDTO;
@@ -13,7 +14,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/review")
-@CrossOrigin("http://localhost:5173")
 public class ReviewController {
     @Autowired
     private ReviewService reviewService;
@@ -51,3 +51,4 @@ public class ReviewController {
         return ResponseEntity.noContent().build();
     }
 }
+ */

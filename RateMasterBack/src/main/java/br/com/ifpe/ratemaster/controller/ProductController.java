@@ -1,3 +1,4 @@
+/*
 package br.com.ifpe.ratemaster.controller;
 
 import br.com.ifpe.ratemaster.dto.ProductDTO;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/api/product")
 public class ProductController {
     @Autowired
@@ -53,7 +53,7 @@ public class ProductController {
         product.setDescription(dto.description);
         product.setPrice(dto.price);
         product.setBrandModel(brand);
-        product.setShopModel(shop);
+        product.setUserModel(shop);
         product.setCategoryModel(category);
         product.setImage(dto.image);
 
@@ -70,3 +70,4 @@ public class ProductController {
 //    private List<ProductModel> findByCategory(@PathVariable String name) {
 //        return productService.findProductByCategory(name);}
 }
+ */

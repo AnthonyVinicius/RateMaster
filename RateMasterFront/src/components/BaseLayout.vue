@@ -1,8 +1,6 @@
 <script setup>
 import TheNavbar from './TheNavbar.vue';
 import TheFooter from './TheFooter.vue';
-import { provide } from 'vue';
-import { userData, initAuth } from '@/services/AuthService.js';
 import { configure, defineRule } from 'vee-validate';
 import { required, max, between, min } from '@vee-validate/rules';
 
@@ -27,8 +25,6 @@ configure({
   }
 });
 
-provide('userData', userData);
-initAuth();
 </script>
 
 <template>

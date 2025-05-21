@@ -1,10 +1,7 @@
 package br.com.ifpe.ratemaster.controller;
 
 import br.com.ifpe.ratemaster.entity.BrandModel;
-import br.com.ifpe.ratemaster.entity.ProductModel;
 import br.com.ifpe.ratemaster.service.BrandService;
-import br.com.ifpe.ratemaster.service.ProductService;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/api/brand")
 public class BrandController {
 

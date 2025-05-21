@@ -1,45 +1,74 @@
-import { auth } from '@/firebase.js';
-import DAOService from "@/services/DAOService";
-import { onAuthStateChanged } from 'firebase/auth';
-import { ref } from 'vue';
+import { reactive } from 'vue';
+class AuthService {
 
-const daoUser = new DAOService("user");
-const daoShop = new DAOService("shop");
+  static TOKEN_KEY = 'token';
 
-const userData = ref(null);
+  static login(token) {
+    localStorage.setItem(this.TOKEN_KEY, token);
+    authState.isLogged = true;
+    authState.userRole = this.getUserRole();
+    authState.userId = this.getUserId();
+  }
 
-const fetchUserData = async (uid) => {
+  static logout() {
+    localStorage.removeItem(this.TOKEN_KEY);
+    authState.isLogged = false;
+    authState.userRole = null;
+    authState.userId = null;
+  }
+
+  static getToken() {
+    return localStorage.getItem(this.TOKEN_KEY);
+  }
+
+  static isLoggedIn() {
+    const token = this.getToken();
+    if (!token) return false;
+
     try {
-        const user = await daoUser.search('uid', uid);
-        if (user && user.length > 0) {
-            return { ...user[0] };
-        }
-        const shop = await daoShop.search('uid', uid);
-        if (shop && shop.length > 0) {
-            return { ...shop[0] };
-        }
-        console.warn("Nenhum dado encontrado nas coleções user ou shop.");
-        return null;
-    } catch (error) {
-        console.error("Erro ao buscar dados do usuário:", error);
-        return null;
+      const payload = this.parseJwt(token);
+      const now = Math.floor(Date.now() / 1000);
+      if (payload.exp && payload.exp < now) {
+        return false;
+      }
+      return true;
+    } catch {
+      return false;
     }
-};
+  }
 
-const initAuth = () => {
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            try {
-                const userInfo = await fetchUserData(user.uid);
-                userData.value = userInfo || null;
-            } catch (error) {
-                console.error("Erro ao processar autenticação:", error);
-                userData.value = null;
-            }
-        } else {
-            userData.value = null;
-        }
-    });
-};
+  static parseJwt(token) {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  }
 
-export { userData, initAuth };
+  static getUserRole() {
+    const token = this.getToken();
+    if (!token) return null;
+    const payload = this.parseJwt(token);
+    console.log(payload)
+    return payload.role || null;
+  }
+
+  static getUserId() {
+    const token = this.getToken();
+    if (!token) return null;
+    const payload = this.parseJwt(token);
+    console.log(payload);
+    return payload.id || null;
+  }
+}
+const authState = reactive({
+  isLogged: AuthService.isLoggedIn(),
+  userRole: AuthService.getUserRole(),
+  userId: AuthService.getUserId(),
+});
+export { authState };
+export default AuthService;

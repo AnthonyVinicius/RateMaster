@@ -1,7 +1,6 @@
 package br.com.ifpe.ratemaster.entity;
 
 import jakarta.persistence.*;
-import java.util.List;
 
 @Entity
 @Table(name = "tb_category")
@@ -16,7 +15,7 @@ public class CategoryModel {
     public CategoryModel() {
     }
 
-    public CategoryModel(long id, String name, List<ProductModel> productModels) {
+    public CategoryModel(long id, String name) {
         this.id = id;
         this.name = name;
     }

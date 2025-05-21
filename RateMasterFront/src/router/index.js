@@ -1,8 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/HomePageView.vue'
-import { userData, initAuth } from "@/services/AuthService";
-
-initAuth();
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -23,24 +20,5 @@ const router = createRouter({
   ],
 });
 
-
-router.beforeEach((to, from, next) => {
-  const requiresAuth = to.matched.some(record => record.meta.requireAuth);
-  const requiresShop = to.matched.some(record => record.meta.requireShop);
-
-  if (requiresAuth) {
-    if (userData.value) {
-      if (!requiresShop || (requiresShop && userData.value.userType === "business")) {
-        next();
-      } else {
-        next('/unauthorized');
-      }
-    } else {
-      next("/login");
-    }
-  } else {
-    next();
-  }
-});
 
 export default router;

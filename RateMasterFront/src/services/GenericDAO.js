@@ -16,6 +16,10 @@ class GenericDAO {
     return await apiRequest('get', `/${this.resourcePath}/${id}`);
   }
 
+  async login(object) {
+    return await apiRequest('post', `/${this.resourcePath}/login`, object);
+  }
+  
   async insert(object) {
     return await apiRequest('post', `/${this.resourcePath}/register`, object);
   }
