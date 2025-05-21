@@ -29,6 +29,7 @@ class AuthService {
       const payload = this.parseJwt(token);
       const now = Math.floor(Date.now() / 1000);
       if (payload.exp && payload.exp < now) {
+        this.logout();
         return false;
       }
       return true;
