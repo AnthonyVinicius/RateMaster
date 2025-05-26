@@ -50,7 +50,7 @@ public class ProductController {
 
         BrandModel brand = brandService.findBrandById(dto.brandModel).orElseThrow();
         CategoryModel category = categoryService.findCategoryById(dto.categoryModel).orElseThrow();
-        UserModel user = productService.findProductById(dto.userId).orElseThrow().getUserModel();
+        UserModel user = userService.findUserById(dto.userId).orElseThrow();
 
         ProductModel product = new ProductModel();
         product.setName(dto.name);

@@ -7,5 +7,5 @@ public class ProductDTO {
     public String image;
     public Long brandModel;
     public Long categoryModel;
-    public Long userId;
+    public String userId;
 }

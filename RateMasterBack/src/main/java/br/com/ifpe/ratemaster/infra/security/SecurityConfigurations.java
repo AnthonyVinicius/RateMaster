@@ -35,6 +35,7 @@ public class SecurityConfigurations {
                         .requestMatchers(HttpMethod.POST, "/api/user/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/user/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/user").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/user/update/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/brand").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/brand/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/category").permitAll()

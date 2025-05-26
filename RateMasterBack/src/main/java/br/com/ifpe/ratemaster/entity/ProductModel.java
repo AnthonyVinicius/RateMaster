@@ -14,6 +14,7 @@ public class ProductModel {
 	private String name;
 	private String description;
 	private Double price;
+	@Column(columnDefinition = "TEXT")
 	private String image;
 
 	@ManyToOne(fetch = FetchType.EAGER)

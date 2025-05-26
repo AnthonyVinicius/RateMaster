@@ -1,23 +1,26 @@
 <script setup>
 import CustomButton from '@/components/CustomButton.vue';
-import DAOService from '@/services/DAOService';
-import { ref, onMounted, inject } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { authState } from '@/services/AuthService';
+import { computed } from 'vue';
+import GenericDAO from '@/services/GenericDAO';
 
-
+const userID = computed(() => authState.userId);
+const userName = computed(() => authState.userName);
+const userType = computed(() => authState.userRole);
+const userEmail = computed(() => authState.userEmail);
 const router = useRouter();
 
-const daoProducts = new DAOService('products');
-const daoBrands = new DAOService('brands');
-const daoUser = new DAOService('user');
-const daoShop = new DAOService('shop');
+const daoProducts = new GenericDAO('products');
+const daoBrands = new GenericDAO('brands');
+const daoUser = new GenericDAO('user');
 const products = ref([]);
 const brandMap = ref({});
 const alertMessage = ref(null);
 const alertType = ref('success');
 const showAlert = ref(false);
 
-const userData = inject('userData');
 
 const viewType = ref('columns');
 
@@ -51,15 +54,8 @@ const updateUserName = async () => {
   editedUserName.value = newUserName.value.trim();
   on_off.value = false;
   try {
-    if (userData.value.userType === 'individual') {
-      await daoUser.update(userData.value.id, { name: editedUserName.value });
-    }
-    if (userData.value.userType === 'business') {
-      await daoShop.update(userData.value.id, { name: editedUserName.value });
-    }
-
-    userData.value.name = editedUserName.value;
-
+    await daoUser.update(userID.value, { name: editedUserName.value });
+    userName.value = editedUserName.value;
     newUserName.value = null;
   } catch (error) {
     console.error("Erro ao atualizar o nome:", error);
@@ -82,7 +78,7 @@ const loadBrands = async () => {
 const showAll = async () => {
   try {
     await loadBrands();
-    products.value = await daoProducts.search('idShop', userData.value.id);
+    products.value = await daoProducts.search('idShop', userID.value);
 
     products.value = products.value.map(product => {
       product.brandName = brandMap.value[product.brand] || 'Sem Marca';
@@ -118,6 +114,8 @@ const goToDetails = (productId) => {
 
 onMounted(() => {
   showAll();
+  console.log(userName.value);
+  console.log(userID.value)
 });
 
 </script>
@@ -133,7 +131,7 @@ onMounted(() => {
     </div>
     <div class="ms-3 ">
       <div class="hstack gap-2">
-        <h5 class="profile-text" v-if="!on_off">{{ userData.name }}</h5>
+        <h5 class="profile-text" v-if="!on_off">{{ userName }}</h5>
         <input v-if="on_off" v-model="newUserName" type="text" class="form-control" />
         <div class="hstack gap-2" v-if="on_off">
           <CustomButton class="button me-1 form-control" @click="updateUserName">
@@ -145,7 +143,7 @@ onMounted(() => {
         </div>
       </div>
 
-      <h5>{{ userData.email }}</h5>
+      <h5>{{ userEmail }}</h5>
 
 
     </div>
@@ -158,7 +156,7 @@ onMounted(() => {
     <button type="button" class="btn-close" @click="showAlert = false"></button>
   </div>
 
-  <div class="container-fluid pb-3 bg-white" v-if="userData?.userType !== 'individual'">
+  <div class="container-fluid pb-3 bg-white" v-if="userType !== 'individual'">
     <div class="container-fluid d-flex">
       <div class="hstack gap-3 mt-5 me-auto">
         <RouterLink to="/brand">

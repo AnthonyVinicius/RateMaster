@@ -54,7 +54,6 @@ class AuthService {
     const token = this.getToken();
     if (!token) return null;
     const payload = this.parseJwt(token);
-    console.log(payload)
     return payload.role || null;
   }
 
@@ -62,14 +61,30 @@ class AuthService {
     const token = this.getToken();
     if (!token) return null;
     const payload = this.parseJwt(token);
-    console.log(payload);
     return payload.id || null;
+  }
+
+    static getUserEmail() {
+    const token = this.getToken();
+    if (!token) return null;
+    const payload = this.parseJwt(token);
+    return payload.sub || null;
+  }
+
+    static getUserName() {
+    const token = this.getToken();
+    if (!token) return null;
+    const payload = this.parseJwt(token);
+    console.log(payload)
+    return payload.name || null;
   }
 }
 const authState = reactive({
   isLogged: AuthService.isLoggedIn(),
   userRole: AuthService.getUserRole(),
   userId: AuthService.getUserId(),
+  userName: AuthService.getUserName(),
+  userEmail: AuthService.getUserEmail(),
 });
 export { authState };
 export default AuthService;
