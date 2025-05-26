@@ -3,6 +3,7 @@ import CustomButton from '@/components/CustomButton.vue';
 import { ref, onMounted } from 'vue';
 import { useRouter } from "vue-router";
 import GenericDAO from '@/services/GenericDAO';
+import { authState } from '@/services/AuthService';
 
 const daoBrands = new GenericDAO('brand');
 const router = useRouter();
@@ -13,6 +14,8 @@ const editedBrandName = ref('');
 const alertMessage = ref(null);
 const alertType = ref('success');
 const showAlert = ref(false);
+
+const auth = authState.isLogged;
 
 
 const triggerAlert = (message, type = 'success') => {
@@ -92,7 +95,14 @@ const updateBrand = async () => {
 
 };
 onMounted(async () => {
-    showAllBrands();
+    if (auth){
+        showAllBrands();
+    } else{
+        alert("Usuário não logado");
+        router.push("/login")
+    }
+    
+    
 });
 </script>
 
