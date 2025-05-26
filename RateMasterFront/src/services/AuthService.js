@@ -4,18 +4,22 @@ class AuthService {
   static TOKEN_KEY = 'token';
 
   static login(token) {
-    localStorage.setItem(this.TOKEN_KEY, token);
-    authState.isLogged = true;
-    authState.userRole = this.getUserRole();
-    authState.userId = this.getUserId();
-  }
+  localStorage.setItem(this.TOKEN_KEY, token);
+  authState.isLogged = true;
+  authState.userRole = this.getUserRole();
+  authState.userId = this.getUserId();
+  authState.userEmail = this.getUserEmail();
+  authState.userName = this.getUserName();
+}
 
-  static logout() {
-    localStorage.removeItem(this.TOKEN_KEY);
-    authState.isLogged = false;
-    authState.userRole = null;
-    authState.userId = null;
-  }
+static logout() {
+  localStorage.removeItem(this.TOKEN_KEY);
+  authState.isLogged = false;
+  authState.userRole = null;
+  authState.userId = null;
+  authState.userEmail = null;
+  authState.userName = null;
+}
 
   static getToken() {
     return localStorage.getItem(this.TOKEN_KEY);

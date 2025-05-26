@@ -4,6 +4,8 @@ import { useRouter, useRoute } from "vue-router";
 import CustomButton from "@/components/CustomButton.vue";
 import { Form, Field, ErrorMessage } from 'vee-validate';
 import GenericDAO from "@/services/GenericDAO";
+import { authState } from "@/services/AuthService";
+import { computed } from "vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -11,8 +13,9 @@ const averageRating = ref(0);
 
 const daoProducts = new GenericDAO("product");
 const daoReviews = new GenericDAO("review");
-const daoShops = new GenericDAO('shop');
-const daoUser = new GenericDAO('user');
+const userID = computed(() => authState.userId);
+const userName = computed(() => authState.userName);
+const userType = computed(() => authState.userRole);
 
 const userData = ref(null);
 const product = ref(null);
@@ -46,7 +49,7 @@ const fetchProductDetails = async () => {
     const productId = route.params.id;
     product.value = await daoProducts.getById(productId);
 
-    userData.value = await daoUser.getById(1); // exemplo fixo
+    userData.value = product.value.userModel.id
 
     const allReviews = await daoReviews.getAll();
 
@@ -61,8 +64,6 @@ const fetchProductDetails = async () => {
       averageRating.value = 0;
     }
 
-    const company = await daoShops.getById(product.value.shopModel.id);
-    product.value.companyName = company ? company.name : 'Empresa desconhecida';
 
   } catch (error) {
     console.error("Erro ao carregar os detalhes do produto:", error);
@@ -72,8 +73,8 @@ const fetchProductDetails = async () => {
 const submitReview = async () => {
   const review = {
     productId: product.value.id,
-    userId: userData.value.id,
-    name: userData.value.name,
+    userId: userID.value,
+    name: userName.value,
     rating: Number(newReview.value.rating),
     comment: newReview.value.comment,
     createdAt: new Date().toISOString()
@@ -105,8 +106,8 @@ const submitReview = async () => {
 const submitResponse = async (review, values, { resetForm }) => {
   try {
     const response = {
-      userId: userData.value.id,
-      userName: userData.value.name,
+      userId: userID.value,
+      userName: userName.value,
       comment: responseStates.value[review.id].comment,
       createdAt: new Date().toISOString()
     };
@@ -128,6 +129,7 @@ const submitResponse = async (review, values, { resetForm }) => {
 
 onMounted(async () => {
     fetchProductDetails();
+    console.log(userType.value)
 });
 </script>
 
@@ -162,14 +164,14 @@ onMounted(async () => {
               </div>
             </div>
             <p class="text-secondary text-truncate mb-0">{{ product.description }}</p>
-            <p class="text-secondary text-truncate mb-0"><i class="bi bi-shop me-1"></i>{{ product.companyName }}</p>
+            <p class="text-secondary text-truncate mb-0"><i class="bi bi-shop me-1"></i>{{ product.userModel?.name || 'Empresa desconhecida' }}</p>
             <p class="fs-4 fw-bold text-success mb-0">R$ {{ product.price }}</p>
           </div>
         </div>
       </div>
     </div>
 
-    <div v-if="userData && userData.userType === 'individual'" class="mt-5">
+    <div v-if="userType == 'individual'" class="mt-5">
       <Form @submit="submitReview" class="card p-5 shadow-sm">
         <h3 class="fw-bold mb-3">Deixe sua avaliação</h3>
         <div class="mb-3">

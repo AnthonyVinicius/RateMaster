@@ -3,6 +3,7 @@ package br.com.ifpe.ratemaster.controller;
 import br.com.ifpe.ratemaster.dto.AuthenticationDTO;
 import br.com.ifpe.ratemaster.dto.LoginResponseDTO;
 import br.com.ifpe.ratemaster.dto.RegisterDTO;
+import br.com.ifpe.ratemaster.entity.ProductModel;
 import br.com.ifpe.ratemaster.entity.UserModel;
 import br.com.ifpe.ratemaster.repository.UserRepository;
 import br.com.ifpe.ratemaster.infra.security.TokenService;
@@ -14,6 +15,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/user")
@@ -64,5 +67,9 @@ public class UserController {
                     UserModel updateUser= userService.saveUser(newUser);
                     return ResponseEntity.ok(updateUser);
                 }).orElse(ResponseEntity.notFound().build());
+    }
+    @GetMapping
+    private List<UserModel> listAllUsers(){
+        return userService.listAllUsers();
     }
 }

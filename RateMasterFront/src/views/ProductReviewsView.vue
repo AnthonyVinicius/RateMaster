@@ -17,11 +17,13 @@ const reviews = ref([]);
 const companies = ref([]);
 const searchQuery = ref('');
 
+
 const fetchProducts = async () => {
     try {
         products.value = await daoProducts.getAll();
         companies.value = await daoUser.getAll();
         reviews.value = await daoReviews.getAll();
+
 
         products.value.forEach(product => {
             const productReviews = product.reviewModels || [];
@@ -34,18 +36,17 @@ const fetchProducts = async () => {
                 product.averageRating = 0;
             }
 
-            const company = companies.value.find(company => company.id === product.shopModel.id);
-            product.companyName = company ? company.name : 'Empresa desconhecida';
-
             if (productReviews.length > 0) {
                 product.averageRating = (totalRating / productReviews.length).toFixed(1);
             } else {
                 product.averageRating = 0;
             }
         });
+        
 
     } catch (error) {
         console.error('Erro ao carregar produtos:', error);
+        console.log(products.value)
     }
 };
 
@@ -53,7 +54,7 @@ const filterProducts = computed(() => {
     return products.value.filter(product => {
         const matchSearch = !searchQuery.value ||
             product.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-            product.companyName.toLowerCase().includes(searchQuery.value.toLowerCase());
+            product.userModel.name.toLowerCase().includes(searchQuery.value.toLowerCase());
 
         const price = product.price;
 
@@ -146,7 +147,7 @@ onMounted(() => {
                                     <div class="hstack d-flex align-items-center">
                                         <p class="price m-0 text-truncate">R$ {{ product.price }}</p>
                                         <p class="card-text ms-auto   text-truncate"><strong></strong> {{
-                                            product.companyName }}</p>
+                                            product.userModel?.name || 'Empresa desconhecida' }}</p>
                                     </div>
                                 </div>
                             </div>
