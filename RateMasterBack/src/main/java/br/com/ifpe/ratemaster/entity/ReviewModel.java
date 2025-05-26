@@ -1,4 +1,4 @@
-/*
+
 package br.com.ifpe.ratemaster.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
@@ -71,4 +71,3 @@ public class ReviewModel {
 
 	public void setCreatedAt(String createdAt) {this.createdAt = createdAt;}
 }
- */

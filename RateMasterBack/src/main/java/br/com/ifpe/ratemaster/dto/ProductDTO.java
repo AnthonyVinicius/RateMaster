@@ -6,6 +6,6 @@ public class ProductDTO {
     public Double price;
     public String image;
     public Long brandModel;
-    public Long shopModel;
     public Long categoryModel;
+    public Long userId;
 }

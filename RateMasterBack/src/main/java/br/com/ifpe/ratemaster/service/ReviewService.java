@@ -1,4 +1,3 @@
-/*
 package br.com.ifpe.ratemaster.service;
 
 import br.com.ifpe.ratemaster.entity.ReviewModel;
@@ -23,4 +22,3 @@ public class ReviewService {
 
     public void deleteReview(Long id) {reviewRepository.deleteById(id);}
 }
- */

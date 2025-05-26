@@ -1,4 +1,3 @@
-/*
 package br.com.ifpe.ratemaster.controller;
 
 import br.com.ifpe.ratemaster.dto.ReviewDTO;
@@ -51,4 +50,3 @@ public class ReviewController {
         return ResponseEntity.noContent().build();
     }
 }
- */

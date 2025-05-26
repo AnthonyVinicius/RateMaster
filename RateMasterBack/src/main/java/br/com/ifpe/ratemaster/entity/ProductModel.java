@@ -1,4 +1,4 @@
-/*
+
 package br.com.ifpe.ratemaster.entity;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -21,8 +21,8 @@ public class ProductModel {
 	private BrandModel brandModel;
 
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "shop_id")
-	private ShopModel userModel;
+	@JoinColumn(name = "user_id")
+	private UserModel userModel;
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "category_id")
@@ -32,14 +32,14 @@ public class ProductModel {
 	@JsonManagedReference
 	private List<ReviewModel> reviewModels;
 
-	public ProductModel(BrandModel brandModel, String description, long id, String name, Double price, List<ReviewModel> reviewModels, ShopModel shopModel, CategoryModel categoryModel, String image) {
+	public ProductModel(BrandModel brandModel, String description, long id, String name, Double price, List<ReviewModel> reviewModels, UserModel userModel, CategoryModel categoryModel, String image) {
 		this.brandModel = brandModel;
 		this.description = description;
 		this.id = id;
 		this.name = name;
 		this.price = price;
 		this.reviewModels = reviewModels;
-		this.userModel = shopModel;
+		this.userModel = userModel;
 		this.categoryModel = categoryModel;
 		this.image = image;
 	}
@@ -91,15 +91,15 @@ public class ProductModel {
 		this.reviewModels = reviewModels;
 	}
 
-	public ShopModel getUserModel() {
-		return userModel;
-	}
+    public UserModel getUserModel() {
+        return userModel;
+    }
 
-	public void setUserModel(ShopModel userModel) {
-		this.userModel = userModel;
-	}
+    public void setUserModel(UserModel userModel) {
+        this.userModel = userModel;
+    }
 
-	public CategoryModel getCategoryModel() {return categoryModel;}
+    public CategoryModel getCategoryModel() {return categoryModel;}
 
 	public void setCategoryModel(CategoryModel categoryModel) {this.categoryModel = categoryModel;}
 
@@ -107,4 +107,3 @@ public class ProductModel {
 
 	public void setImage(String image) {this.image = image;}
 }
-*/

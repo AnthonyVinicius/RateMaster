@@ -5,7 +5,7 @@ import GenericDAO from '@/services/GenericDAO';
 
 const daoProducts = new GenericDAO('product');
 const daoReviews = new GenericDAO('review');
-const daoShops = new GenericDAO('shop');
+const daoUser = new GenericDAO('user');
 const router = useRouter();
 
 const products = ref([]);
@@ -20,7 +20,7 @@ const searchQuery = ref('');
 const fetchProducts = async () => {
     try {
         products.value = await daoProducts.getAll();
-        companies.value = await daoShops.getAll();
+        companies.value = await daoUser.getAll();
         reviews.value = await daoReviews.getAll();
 
         products.value.forEach(product => {

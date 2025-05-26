@@ -4,18 +4,23 @@ import GenericDAO from '@/services/GenericDAO';
 import { Form, Field, ErrorMessage } from 'vee-validate';
 import { ref, onMounted } from 'vue';
 import { useRouter } from "vue-router";
+import { authState } from '@/services/AuthService';
+import { computed } from 'vue';
 
 const router = useRouter();
 const daoProducts = new GenericDAO('product');
 const daoBrands = new GenericDAO('brand');
 const daoCategories = new GenericDAO('category');
 
+const idUser = computed(() => authState.userId);
+
+
 const product = ref({
   name: '',
   description: '',
   price: 0,
   brandModel: '',
-  shopModel: '',
+  userId: '',
   categoryModel: '',
   image: '',
   type: ''
@@ -46,6 +51,11 @@ const loadCategories = async () => {
 };
 
 onMounted(() => {
+  if (!authState.isLogged){
+    router.push('/login');
+    return;
+  }
+
   loadBrands();
   loadCategories();
 });
@@ -76,7 +86,7 @@ const submit = async () => {
   const price = product.value.price;
   const image = product.value.image.trim();
   const brandModel = product.value.brandModel;
-  const shopModel = 1;
+  const userId = idUser.value;
   const categoryModel = product.value.categoryModel;
   const type = product.value.type;
 
@@ -86,7 +96,7 @@ const submit = async () => {
     price,
     image,
     brandModel,
-    shopModel,
+    userId,
     categoryModel,
     type
   };
