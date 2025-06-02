@@ -28,7 +28,7 @@ const handleLogin = async () => {
 
     if (token) {
       AuthService.login(token);
-      console.log('Token salvo e estado atualizado:', token);
+      console.log('Token salvo e estado atualizado:');
       router.push('/');
     } else {
       errMsg.value = 'Token não recebido da API.';

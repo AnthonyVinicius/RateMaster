@@ -1,94 +1,81 @@
 <script setup>
 import CustomButton from '@/components/CustomButton.vue';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { authState } from '@/services/AuthService';
-import { computed } from 'vue';
 import GenericDAO from '@/services/GenericDAO';
 
 const userID = computed(() => authState.userId);
 const userName = computed(() => authState.userName);
 const userType = computed(() => authState.userRole);
 const userEmail = computed(() => authState.userEmail);
-const router = useRouter();
 
-const daoProducts = new GenericDAO('products');
-const daoBrands = new GenericDAO('brands');
+const router = useRouter();
+const daoProducts = new GenericDAO('product');
+const daoBrands = new GenericDAO('brand');
 const daoUser = new GenericDAO('user');
 const products = ref([]);
 const brandMap = ref({});
 const alertMessage = ref(null);
 const alertType = ref('success');
 const showAlert = ref(false);
-
-
 const viewType = ref('columns');
-
-const on_off = ref(false);
+const isEditingUserName = ref(false);
 const newUserName = ref('');
-const editedUserName = ref('');
+const editedUserName = ref(false);
 
-const viewTypeColumns = () => {
-  viewType.value = 'columns';
-};
-
-const viewTypeList = () => {
-  viewType.value = 'list';
-};
-const editUserName = () => {
-  on_off.value = true;
-};
-
-const cancelEditUserName = () => {
-  on_off.value = false;
-  newUserName.value = null;
-};
 const triggerAlert = (message, type = 'success') => {
-    alertMessage.value = message;
-    alertType.value = type;
-    showAlert.value = true;
-    setTimeout(() => (showAlert.value = false), 3000);
+  alertMessage.value = message;
+  alertType.value = type;
+  showAlert.value = true;
+  setTimeout(() => (showAlert.value = false), 3000);
 };
+const viewTypeColumns = () => { viewType.value = 'columns'; };
+const viewTypeList = () => { viewType.value = 'list'; };
 
+
+const editUserName = () => { isEditingUserName.value = true; };
+const cancelEditUserName = () => {
+  isEditingUserName.value = false;
+  newUserName.value = "";
+};
+/*
 const updateUserName = async () => {
   editedUserName.value = newUserName.value.trim();
-  on_off.value = false;
+  isEditingUserName.value = false;
   try {
     await daoUser.update(userID.value, { name: editedUserName.value });
-    userName.value = editedUserName.value;
-    newUserName.value = null;
+    authState.userName = editedUserName.value;
+    newUserName.value = '';
+    triggerAlert('Nome atualizado com sucesso!');
   } catch (error) {
     console.error("Erro ao atualizar o nome:", error);
+    triggerAlert('Erro ao atualizar o nome.', 'danger');
   }
 };
-
-
-const loadBrands = async () => {
-  try {
-    const brands = await daoBrands.getAll();
-    brandMap.value = brands.reduce((map, brand) => {
-      map[brand.id] = brand.name;
-      return map;
-    }, {});
-  } catch (error) {
-    console.error("Erro ao carregar marcas:", error);
-  }
-};
+*/
 
 const showAll = async () => {
   try {
-    await loadBrands();
-    products.value = await daoProducts.search('idShop', userID.value);
+    const [brands, productsData] = await Promise.all([
+      daoBrands.getAll(),
+      daoProducts.getAll()
+    ]);
+    const map = {};
+    for (const brand of brands) {
+      map[brand.id] = brand.name;
+    }
+    brandMap.value = map;
 
-    products.value = products.value.map(product => {
-      product.brandName = brandMap.value[product.brand] || 'Sem Marca';
-      return product
-    });
+    products.value = productsData.map(product => ({
+      ...product,
+      brandName: map[product.brand] || 'Sem Marca'
+    }));
   } catch (error) {
-    console.log('erro filtrado', products.value)
-    console.error('Erro ao carregar produtos:', error);
+    console.error('Erro ao carregar dados:', error);
   }
 };
+
 
 const deleteProduct = async (id) => {
   if (confirm('Tem certeza de que deseja remover este Produto?')) {
@@ -114,8 +101,6 @@ const goToDetails = (productId) => {
 
 onMounted(() => {
   showAll();
-  console.log(userName.value);
-  console.log(userID.value)
 });
 
 </script>
@@ -131,10 +116,10 @@ onMounted(() => {
     </div>
     <div class="ms-3 ">
       <div class="hstack gap-2">
-        <h5 class="profile-text" v-if="!on_off">{{ userName }}</h5>
-        <input v-if="on_off" v-model="newUserName" type="text" class="form-control" />
-        <div class="hstack gap-2" v-if="on_off">
-          <CustomButton class="button me-1 form-control" @click="updateUserName">
+        <h5 class="profile-text" v-if="!isEditingUserName">{{ userName }}</h5>
+        <input v-if="isEditingUserName" v-model="newUserName" type="text" class="form-control" />
+        <div class="hstack gap-2" v-if="isEditingUserName">
+          <CustomButton class="button me-1 form-control" @click="updateUserName" :disabled="!newUserName.trim()">
             Salvar
           </CustomButton>
           <CustomButton class="button form-control" @click="cancelEditUserName">
@@ -190,14 +175,15 @@ onMounted(() => {
                 </div>
                 <p class="card-text text-truncate">Marca: <strong>{{ product.brandName }}</strong></p>
                 <p class="card-text text-truncate">{{ product.description }}</p>
-                <p class="price text-truncate">{{ product.price }}</p>
+                <p class="price text-truncate">R$ {{ product.price }}</p>
               </div>
             </div>
             <div class="card-actions">
-              <CustomButton @click="deleteProduct(product.id)" class="action-button">
+              <CustomButton @click.stop="deleteProduct(product.id)" class="action-button">
                 <i class="bi bi-trash-fill"></i>
               </CustomButton>
-              <CustomButton @click="goToUpdate(product.id)" class="action-button">
+
+              <CustomButton @click.stop="goToUpdate(product.id)" class="action-button">
                 <i class="bi bi-pencil-square"></i>
               </CustomButton>
             </div>
@@ -232,7 +218,7 @@ onMounted(() => {
                   </td>
                   <td class="card-text">{{ product.name }}</td>
                   <td class="card-text">{{ product.brandName }}</td>
-                  <td class="price">{{ product.price }}</td>
+                  <td class="price">R$ {{ product.price }}</td>
                   <td class="card-text">{{ product.type }}</td>
                   <td class="card-text">{{ product.description }}</td>
                   <td>
@@ -292,7 +278,6 @@ onMounted(() => {
 
 .product-img-list {
   max-width: 50px;
-  max-width: 100%;
   max-height: 100%;
 }
 

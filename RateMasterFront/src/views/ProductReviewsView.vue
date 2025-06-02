@@ -144,10 +144,9 @@ onMounted(() => {
                                         </div>
                                     </div>
                                     <p class="card-text text-truncate">{{ product.description }}</p>
-                                    <div class="hstack d-flex align-items-center">
+                                   <div class="d-flex flex-column">
                                         <p class="price m-0 text-truncate">R$ {{ product.price }}</p>
-                                        <p class="card-text ms-auto   text-truncate"><strong></strong> {{
-                                            product.userModel?.name || 'Empresa desconhecida' }}</p>
+                                        <p class="card-text text-truncate mt-1">{{ product.userModel?.name || 'Empresa desconhecida' }}</p>
                                     </div>
                                 </div>
                             </div>
