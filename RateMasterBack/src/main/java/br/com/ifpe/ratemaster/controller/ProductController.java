@@ -11,10 +11,7 @@ import br.com.ifpe.ratemaster.service.ProductService;
 import br.com.ifpe.ratemaster.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 
@@ -34,12 +31,12 @@ public class ProductController {
     private CategoryService categoryService;
 
     @GetMapping
-    private List<ProductModel> listAllProducts(){
+    private List<ProductModel> listAllProducts() {
         return productService.listAllProducts();
     }
 
     @GetMapping("/{id}")
-    private ResponseEntity findProductById(@PathVariable Long id){
+    private ResponseEntity findProductById(@PathVariable Long id) {
         return productService.findProductById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -65,12 +62,29 @@ public class ProductController {
     }
 
     @DeleteMapping("/delete/{id}")
-    private ResponseEntity<Void> deleteProductById(@PathVariable Long id){
+    private ResponseEntity<Void> deleteProductById(@PathVariable Long id) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
 
-//    @GetMapping("/category/{name}")
-//    private List<ProductModel> findByCategory(@PathVariable String name) {
-//        return productService.findProductByCategory(name);}
+    @PutMapping("/update/{id}")
+    public ResponseEntity<ProductModel> updateProduct(@PathVariable Long id, @RequestBody ProductDTO dto) {
+        return productService.findProductById(id).map(existingProduct -> {
+            existingProduct.setName(dto.name);
+            existingProduct.setDescription(dto.description);
+            existingProduct.setPrice(dto.price);
+            existingProduct.setImage(dto.image);
+
+            BrandModel brand = brandService.findBrandById(dto.brandModel).orElseThrow();
+            CategoryModel category = categoryService.findCategoryById(dto.categoryModel).orElseThrow();
+            UserModel user = userService.findUserById(dto.userId).orElseThrow();
+
+            existingProduct.setBrandModel(brand);
+            existingProduct.setCategoryModel(category);
+            existingProduct.setUserModel(user);
+
+            ProductModel savedProduct = productService.saveProduct(existingProduct);
+            return ResponseEntity.ok(savedProduct);
+        }).orElse(ResponseEntity.notFound().build());
+    }
 }

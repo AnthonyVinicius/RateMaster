@@ -47,6 +47,8 @@ public class SecurityConfigurations {
                         .requestMatchers(HttpMethod.POST, "/api/category/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/product/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/product/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/product/update/{id}").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/api/product/delete/{id}").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/review").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/review/register").permitAll()
                         .anyRequest().authenticated()

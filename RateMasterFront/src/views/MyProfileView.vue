@@ -5,7 +5,6 @@ import { useRouter } from 'vue-router';
 import { authState } from '@/services/AuthService';
 import GenericDAO from '@/services/GenericDAO';
 
-const userID = computed(() => authState.userId);
 const userName = computed(() => authState.userName);
 const userType = computed(() => authState.userRole);
 const userEmail = computed(() => authState.userEmail);
@@ -13,7 +12,6 @@ const userEmail = computed(() => authState.userEmail);
 const router = useRouter();
 const daoProducts = new GenericDAO('product');
 const daoBrands = new GenericDAO('brand');
-const daoUser = new GenericDAO('user');
 const products = ref([]);
 const brandMap = ref({});
 const alertMessage = ref(null);
@@ -22,7 +20,6 @@ const showAlert = ref(false);
 const viewType = ref('columns');
 const isEditingUserName = ref(false);
 const newUserName = ref('');
-const editedUserName = ref(false);
 
 const triggerAlert = (message, type = 'success') => {
   alertMessage.value = message;

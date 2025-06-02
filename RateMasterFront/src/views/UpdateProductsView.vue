@@ -1,9 +1,12 @@
 <script setup>
 import CustomButton from '@/components/CustomButton.vue';
-import DAOService from '@/services/DAOService';
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { Form, Field, ErrorMessage } from 'vee-validate';
+import GenericDAO from '@/services/GenericDAO';
+import { authState } from '@/services/AuthService';
+import { computed } from 'vue';
+
+const idUser = computed(() => authState.userId);
 
 const route = useRoute();
 const router = useRouter();
@@ -11,22 +14,30 @@ const router = useRouter();
 const alertMessage = ref(null);
 const alertType = ref('success');
 const showAlert = ref(false);
-
-const daoProducts = new DAOService('products');
-const daoBrands = new DAOService('brands');
+const priceInput = ref('');
+const daoProducts = new GenericDAO('product');
+const daoBrands = new GenericDAO('brand');
+const daoCategories = new GenericDAO('category');
 
 const brands = ref([]);
+const categories = ref([]);
 const product = ref({
   name: '',
   description: '',
-  brand: '',
-  price: '',
-  type: '',
-  image: null,
+  price: 0,
+  brandModel: '',
+  userId: '',
+  categoryModel: '',
+  image: '',
+  type: ''
 });
 
 const loadBrands = async () => {
   brands.value = await daoBrands.getAll();
+};
+
+const loadCategories = async () => {
+  categories.value = await daoCategories.getAll();
 };
 
 const triggerAlert = (message, type = 'success') => {
@@ -46,8 +57,9 @@ const fetchProduct = async () => {
   }
 
   try {
-    const fetchedProduct = await daoProducts.get(productId);
+    const fetchedProduct = await daoProducts.getById(productId);
     product.value = { ...fetchedProduct };
+    console.log(fetchedProduct)
   } catch (error) {
     console.error(error);
     triggerAlert('Erro ao carregar o produto.', 'danger');
@@ -55,32 +67,62 @@ const fetchProduct = async () => {
   }
 };
 
-const submit = async () => {
-  if (!product.value.name || !product.value.description || !product.value.price || !product.value.brand || !product.value.type) {
-    triggerAlert('Por favor, preencha todos os campos obrigatórios!', 'warning');
-    return;
-  }
+
+  const submit = async () => {
+  const name = product.value.name.trim();
+  const description = product.value.description.trim();
+  const price = product.value.price;
+  const image = product.value.image.trim();
+  const brandModel = product.value.brandModel;
+  const userId = idUser.value;
+  const categoryModel = product.value.categoryModel;
+  const type = product.value.type;
+
+  const productData = {
+    name,
+    description,
+    price,
+    image,
+    brandModel,
+    userId,
+    categoryModel,
+    type
+  };
 
   try {
-    await daoProducts.update(product.value.id, product.value);
+    await daoProducts.update(product.value.id, productData);
     triggerAlert('Produto atualizado com sucesso!', 'success');
     router.push("/myProfile");
   } catch (error) {
     console.error(error);
     triggerAlert('Erro ao atualizar o produto.', 'danger');
+    console.log(productData)
   }
 };
 
 const formatPrice = (event) => {
-  let value = event.target.value.replace(/\D/g, '');
-  if (value.length > 2) {
-    value = value.slice(0, value.length - 2) + ',' + value.slice(value.length - 2);
+  let value = event.target.value.replace(/[^\d]/g, '');
+
+  if (value === '') {
+    priceInput.value = '';
+    product.value.price = 0;
+    return;
   }
-  product.value.price = value ? 'R$ ' + value : '';
+
+  let numericValue = parseFloat(value) / 100;
+
+  priceInput.value = numericValue.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: 2
+  });
+
+  product.value.price = numericValue;
 };
 
 onMounted(() => {
   loadBrands();
+  loadCategories();
   fetchProduct();
 });
 </script>
@@ -126,30 +168,15 @@ onMounted(() => {
           <div class="card border-0 shadow-sm">
             <div class="card-body p-4">
               <h5 class="card-title mb-4">Editar Produto</h5>
-              <Form @submit="submit">
+              <form @submit.prevent="submit">
                 <div class="form-floating mb-3">
-                  <Field id="productName" name="productName" type="text" rules="required|min:5|max:100"
-                    v-slot="{ field, errors, meta }">
-                    <input v-model="product.name" v-bind="field" :class="{
-                      'form-control': true,
-                      'is-valid': meta.touched && !errors.length,
-                      'is-invalid': meta.touched && errors.length
-                    }" placeholder="Digite o nome do produto" />
-                  </Field>
-                  <ErrorMessage name="productName" class="invalid-feedback" />
-                  <label for="productName">Nome do Produto</label>
-                </div>
+                <input v-model="product.name" type="text" class="form-control" id="productName" placeholder="Digite o nome do produto" required />
+                <label for="productName">Nome do Produto</label>
+              </div>
 
                 <div class="form-floating mb-3">
-                  <Field id="description" name="description" type="text" rules="required|min:5|max:300"
-                    v-slot="{ field, errors, meta }">
-                    <textarea v-model="product.description" v-bind="field" :class="{
-                      'form-control': true,
-                      'is-valid': meta.touched && !errors.length,
-                      'is-invalid': meta.touched && errors.length
-                    }" placeholder="Digite a descrição do produto" style="height: 100px"></textarea>
-                  </Field>
-                  <ErrorMessage name="description" class="invalid-feedback" />
+                  <textarea v-model="product.description" class="form-control" id="description"
+                    placeholder="Digite a descrição do produto" style="height: 100px" required></textarea>
                   <label for="description">Descrição</label>
                 </div>
 
@@ -177,7 +204,7 @@ onMounted(() => {
                 <div class="mb-4">
                   <div class="d-flex gap-2">
                     <div class="form-floating flex-grow-1">
-                      <select v-model="product.brand" class="form-control">
+                      <select v-model="product.brandModel" class="form-control">
                         <option value="">Selecione a marca</option>
                         <option v-for="brand in brands" :key="brand.id" :value="brand.id">
                           {{ brand.name }}
@@ -185,7 +212,25 @@ onMounted(() => {
                       </select>
                       <label>Marca</label>
                     </div>
+
                     <RouterLink to="/brand" class="d-flex align-items-center">
+                      <CustomButton>
+                        <i class="bi bi-plus-lg"></i>
+                      </CustomButton>
+                    </RouterLink>
+
+                    <div class="form-floating flex-grow-1">
+                      <select v-model="product.categoryModel" class="form-control">
+                        <option value="">Selecione a categoria</option>
+                        <option v-for="category in categories" :key="category.id" :value="category.id">
+                          {{ category.name }}
+                        </option>
+                      </select>
+                      <label>Categoria</label>
+                    </div>
+                    
+                    
+                    <RouterLink to="/category" class="d-flex align-items-center">
                       <CustomButton>
                         <i class="bi bi-plus-lg"></i>
                       </CustomButton>
@@ -196,7 +241,7 @@ onMounted(() => {
                 <CustomButton class="button container-fluid py-3">
                   Salvar Alterações
                 </CustomButton>
-              </Form>
+              </form>
             </div>
           </div>
         </div>
