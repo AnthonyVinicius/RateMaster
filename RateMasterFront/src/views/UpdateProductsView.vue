@@ -59,7 +59,11 @@ const fetchProduct = async () => {
   try {
     const fetchedProduct = await daoProducts.getById(productId);
     product.value = { ...fetchedProduct };
-    console.log(fetchedProduct)
+    priceInput.value = product.value.price.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 2
+    });
   } catch (error) {
     console.error(error);
     triggerAlert('Erro ao carregar o produto.', 'danger');
@@ -100,17 +104,15 @@ const fetchProduct = async () => {
   }
 };
 
-const formatPrice = (event) => {
-  let value = event.target.value.replace(/[^\d]/g, '');
+const formatPrice = () => {
+  let value = priceInput.value.replace(/[^\d]/g, '');
 
   if (value === '') {
-    priceInput.value = '';
     product.value.price = 0;
     return;
   }
 
-  let numericValue = parseFloat(value) / 100;
-
+  const numericValue = parseFloat(value) / 100;
   priceInput.value = numericValue.toLocaleString('pt-BR', {
     style: 'currency',
     currency: 'BRL',
@@ -183,8 +185,7 @@ onMounted(() => {
                 <div class="row g-3 mb-3">
                   <div class="col-md-6">
                     <div class="form-floating">
-                      <input v-model="product.price" type="text" class="form-control" placeholder="R$ 0,00" required
-                        @input="formatPrice" />
+                      <input v-model="priceInput" type="text" class="form-control" placeholder="R$ 0,00" required @input="formatPrice" />
                       <label>Preço</label>
                     </div>
                   </div>

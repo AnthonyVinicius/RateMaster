@@ -130,6 +130,8 @@ const submitResponse = async (review, values, { resetForm }) => {
 onMounted(async () => {
     fetchProductDetails();
     console.log(userType.value)
+    console.log(product.value)
+    console.log(reviews.value)
 });
 </script>
 
@@ -249,7 +251,7 @@ onMounted(async () => {
                 </div>
               </div>
 
-              <div v-if="userData.userType === 'shop' && review.productId && product.idShop === userData.id"
+              <div v-if="userType == 'business' && review.productId && userData === userID"
                 class="bg-light rounded-3 p-4 mt-3">
                 <Form v-slot="{ resetForm }" @submit="values => submitResponse(review, values, { resetForm })">
                   <textarea v-model="responseStates[review.id].comment" class="form-control mb-3" rows="4"
