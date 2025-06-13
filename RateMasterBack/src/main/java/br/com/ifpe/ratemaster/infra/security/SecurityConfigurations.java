@@ -57,6 +57,9 @@ public class SecurityConfigurations {
                         //Review
                         .requestMatchers(HttpMethod.GET, "/api/review").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/review/register").authenticated()
+                        //Response
+                        .requestMatchers(HttpMethod.GET, "/api/response").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/response/register").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
