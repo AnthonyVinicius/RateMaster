@@ -3,6 +3,7 @@ import CustomButton from '@/components/CustomButton.vue';
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { authState } from '@/services/AuthService';
+import ProductDAO from '@/services/ProductDAO';
 import GenericDAO from '@/services/GenericDAO';
 
 const userName = computed(() => authState.userName);
@@ -10,10 +11,9 @@ const userType = computed(() => authState.userRole);
 const userEmail = computed(() => authState.userEmail);
 
 const router = useRouter();
-const daoProducts = new GenericDAO('product');
-const daoBrands = new GenericDAO('brand');
+const daoProducts = new ProductDAO();
+const userDAO = new GenericDAO('user');
 const products = ref([]);
-const brandMap = ref({});
 const alertMessage = ref(null);
 const alertType = ref('success');
 const showAlert = ref(false);
@@ -27,22 +27,31 @@ const triggerAlert = (message, type = 'success') => {
   showAlert.value = true;
   setTimeout(() => (showAlert.value = false), 3000);
 };
+
 const viewTypeColumns = () => { viewType.value = 'columns'; };
+
 const viewTypeList = () => { viewType.value = 'list'; };
 
+const editUserName = () => {
+  newUserName.value = authState.userName;
+  isEditingUserName.value = true;
+};
 
-const editUserName = () => { isEditingUserName.value = true; };
 const cancelEditUserName = () => {
   isEditingUserName.value = false;
-  newUserName.value = "";
+  newUserName.value = '';
 };
-/*
+
 const updateUserName = async () => {
-  editedUserName.value = newUserName.value.trim();
+  const updatedName = newUserName.value.trim();
+  if (!updatedName) return;
+
   isEditingUserName.value = false;
   try {
-    await daoUser.update(userID.value, { name: editedUserName.value });
-    authState.userName = editedUserName.value;
+    await userDAO.update(authState.userId, { name: updatedName });
+
+    authState.userName = updatedName;
+
     newUserName.value = '';
     triggerAlert('Nome atualizado com sucesso!');
   } catch (error) {
@@ -50,29 +59,14 @@ const updateUserName = async () => {
     triggerAlert('Erro ao atualizar o nome.', 'danger');
   }
 };
-*/
 
-const showAll = async () => {
+const fetchProducts = async () => {
   try {
-    const [brands, productsData] = await Promise.all([
-      daoBrands.getAll(),
-      daoProducts.getAll()
-    ]);
-    const map = {};
-    for (const brand of brands) {
-      map[brand.id] = brand.name;
-    }
-    brandMap.value = map;
-
-    products.value = productsData.map(product => ({
-      ...product,
-      brandName: map[product.brand] || 'Sem Marca'
-    }));
+    products.value = await daoProducts.getMyProducts(); ;
   } catch (error) {
-    console.error('Erro ao carregar dados:', error);
+    console.error('Erro ao buscar produtos:', error);
   }
 };
-
 
 const deleteProduct = async (id) => {
   if (confirm('Tem certeza de que deseja remover este Produto?')) {
@@ -95,12 +89,11 @@ const goToDetails = (productId) => {
   router.push({ name: 'productDetail', params: { id: productId } });
 };
 
-
 onMounted(() => {
-  showAll();
+  fetchProducts();
 });
-
 </script>
+
 
 <template>
   <div class="text-white d-flex flex-row profile-background position-relative">
@@ -170,7 +163,7 @@ onMounted(() => {
                 <div class="hstack">
                   <h4 class="fw-bold text-truncate">{{ product.name }}</h4>
                 </div>
-                <p class="card-text text-truncate">Marca: <strong>{{ product.brandName }}</strong></p>
+                <p class="card-text text-truncate">Marca: <strong>{{ product.brandModel?.name || 'Sem Marca' }}</strong></p>
                 <p class="card-text text-truncate">{{ product.description }}</p>
                 <p class="price text-truncate">R$ {{ product.price }}</p>
               </div>
@@ -214,7 +207,7 @@ onMounted(() => {
                     </div>
                   </td>
                   <td class="card-text">{{ product.name }}</td>
-                  <td class="card-text">{{ product.brandName }}</td>
+                  <td class="card-text">{{ product.brandModel?.name || 'Sem Marca' }}</td>
                   <td class="price">R$ {{ product.price }}</td>
                   <td class="card-text">{{ product.type }}</td>
                   <td class="card-text">{{ product.description }}</td>

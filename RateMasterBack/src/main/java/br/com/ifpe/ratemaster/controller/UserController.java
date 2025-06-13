@@ -69,7 +69,7 @@ public class UserController {
                 }).orElse(ResponseEntity.notFound().build());
     }
     @GetMapping
-    private List<UserModel> listAllUsers(){
+    public List<UserModel> listAllUsers(){
         return userService.listAllUsers();
     }
 }

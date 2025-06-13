@@ -10,7 +10,11 @@ import br.com.ifpe.ratemaster.service.CategoryService;
 import br.com.ifpe.ratemaster.service.ProductService;
 import br.com.ifpe.ratemaster.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,19 +35,37 @@ public class ProductController {
     private CategoryService categoryService;
 
     @GetMapping
-    private List<ProductModel> listAllProducts() {
+    public List<ProductModel> listAllProducts() {
         return productService.listAllProducts();
     }
 
     @GetMapping("/{id}")
-    private ResponseEntity findProductById(@PathVariable Long id) {
+    public ResponseEntity findProductById(@PathVariable Long id) {
         return productService.findProductById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/myProducts")
+    public ResponseEntity<List<ProductModel>> listMyProducts() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) {
+            System.out.println("auth null");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String email = auth.getName();
+        UserModel user = (UserModel) userService.loadUserByUsername(email);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        System.out.println("User ID: " + user.getId());
+        List<ProductModel> products = productService.findByUserId(user.getId());
+        System.out.println("Produtos encontrados: " + (products == null ? "null" : products.size()));
+        return ResponseEntity.ok(products);
+    }
+
     @PostMapping("/register")
-    private ProductModel registerProduct(@RequestBody ProductDTO dto) {
+    public ProductModel registerProduct(@RequestBody ProductDTO dto) {
 
         BrandModel brand = brandService.findBrandById(dto.brandModel).orElseThrow();
         CategoryModel category = categoryService.findCategoryById(dto.categoryModel).orElseThrow();
@@ -62,7 +84,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/delete/{id}")
-    private ResponseEntity<Void> deleteProductById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteProductById(@PathVariable Long id) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }

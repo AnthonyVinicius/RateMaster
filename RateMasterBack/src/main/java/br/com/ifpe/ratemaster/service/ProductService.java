@@ -14,6 +14,8 @@ public class ProductService {
 
     public List<ProductModel> listAllProducts() {return productRepository.findAll();}
 
+    public List<ProductModel> findByUserId(String userId){return productRepository.findByUserModelId(userId);}
+
     public ProductModel saveProduct(ProductModel productModel) {return productRepository.save(productModel);}
 
     public Optional<ProductModel> findProductById(Long id) {return productRepository.findById(id);}

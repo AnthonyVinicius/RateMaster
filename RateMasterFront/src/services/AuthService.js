@@ -1,88 +1,95 @@
 import { reactive } from 'vue';
-class AuthService {
 
+class AuthService {
   static TOKEN_KEY = 'token';
+  static #cachedPayload = null;
 
   static login(token) {
-  localStorage.setItem(this.TOKEN_KEY, token);
-  authState.isLogged = true;
-  authState.userRole = this.getUserRole();
-  authState.userId = this.getUserId();
-  authState.userEmail = this.getUserEmail();
-  authState.userName = this.getUserName();
-}
+    localStorage.setItem(this.TOKEN_KEY, token);
+    this.clearCache();
+    this.updateAuthState();
+  }
 
-static logout() {
-  localStorage.removeItem(this.TOKEN_KEY);
-  authState.isLogged = false;
-  authState.userRole = null;
-  authState.userId = null;
-  authState.userEmail = null;
-  authState.userName = null;
-}
+  static logout() {
+    localStorage.removeItem(this.TOKEN_KEY);
+    this.clearCache();
+    this.updateAuthState();
+  }
 
   static getToken() {
     return localStorage.getItem(this.TOKEN_KEY);
+  }
+
+  static clearCache() {
+    this.#cachedPayload = null;
   }
 
   static isLoggedIn() {
     const token = this.getToken();
     if (!token) return false;
 
-    try {
-      const payload = this.parseJwt(token);
-      const now = Math.floor(Date.now() / 1000);
-      if (payload.exp && payload.exp < now) {
-        this.logout();
-        return false;
-      }
-      return true;
-    } catch {
+    const payload = this.parseJwt(token);
+    if (!payload) return false;
+
+    const now = Math.floor(Date.now() / 1000);
+    if (payload.exp && payload.exp < now) {
+      this.logout();
       return false;
     }
+
+    return true;
   }
 
   static parseJwt(token) {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
-    );
-    return JSON.parse(jsonPayload);
+    if (this.#cachedPayload) return this.#cachedPayload;
+
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      this.#cachedPayload = JSON.parse(jsonPayload);
+      return this.#cachedPayload;
+    } catch (err) {
+      console.error("Erro ao decodificar o token:", err);
+      return null;
+    }
+  }
+
+  static getPayload() {
+    const token = this.getToken();
+    return token ? this.parseJwt(token) : null;
   }
 
   static getUserRole() {
-    const token = this.getToken();
-    if (!token) return null;
-    const payload = this.parseJwt(token);
-    return payload.role || null;
+    return this.getPayload()?.role || null;
   }
 
   static getUserId() {
-    const token = this.getToken();
-    if (!token) return null;
-    const payload = this.parseJwt(token);
-    return payload.id || null;
+    return this.getPayload()?.id || null;
   }
 
-    static getUserEmail() {
-    const token = this.getToken();
-    if (!token) return null;
-    const payload = this.parseJwt(token);
-    return payload.sub || null;
+  static getUserEmail() {
+    return this.getPayload()?.sub || null;
   }
 
-    static getUserName() {
-    const token = this.getToken();
-    if (!token) return null;
-    const payload = this.parseJwt(token);
-    console.log(payload)
-    return payload.name || null;
+  static getUserName() {
+    return this.getPayload()?.name || null;
+  }
+
+  static updateAuthState() {
+    authState.isLogged = this.isLoggedIn();
+    authState.userRole = this.getUserRole();
+    authState.userId = this.getUserId();
+    authState.userEmail = this.getUserEmail();
+    authState.userName = this.getUserName();
   }
 }
+
 const authState = reactive({
   isLogged: AuthService.isLoggedIn(),
   userRole: AuthService.getUserRole(),
@@ -90,5 +97,6 @@ const authState = reactive({
   userName: AuthService.getUserName(),
   userEmail: AuthService.getUserEmail(),
 });
+
 export { authState };
 export default AuthService;

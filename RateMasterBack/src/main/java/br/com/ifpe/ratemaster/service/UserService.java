@@ -1,7 +1,5 @@
 package br.com.ifpe.ratemaster.service;
 
-import br.com.ifpe.ratemaster.entity.BrandModel;
-import br.com.ifpe.ratemaster.entity.ProductModel;
 import br.com.ifpe.ratemaster.entity.UserModel;
 import br.com.ifpe.ratemaster.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +21,7 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return repository.findByEmail(username);
     }
+
     public List<UserModel> listAllUsers() {return repository.findAll();}
 
     public UserModel saveUser(UserModel userModel) {return repository.save(userModel);}

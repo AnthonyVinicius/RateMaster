@@ -2,8 +2,9 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import GenericDAO from '@/services/GenericDAO';
+import ProductDAO from '@/services/ProductDAO';
 
-const daoProducts = new GenericDAO('product');
+const daoProducts = new ProductDAO();
 const daoReviews = new GenericDAO('review');
 const daoUser = new GenericDAO('user');
 const router = useRouter();
@@ -46,7 +47,6 @@ const fetchProducts = async () => {
 
     } catch (error) {
         console.error('Erro ao carregar produtos:', error);
-        console.log(products.value)
     }
 };
 
