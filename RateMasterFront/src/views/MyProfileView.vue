@@ -173,7 +173,7 @@ onMounted(async () => {
     <button type="button" class="btn-close" @click="showAlert = false"></button>
   </div>
 
-  <div class="container-fluid pb-3 bg-white" v-if="userData.type !== 'individual'">
+  <div class="container-fluid pb-3 bg-white" v-if="userData.type !== 'INDIVIDUAL'">
     <div class="container-fluid d-flex">
       <div class="hstack gap-3 mt-5 me-auto">
         <RouterLink to="/brand">
