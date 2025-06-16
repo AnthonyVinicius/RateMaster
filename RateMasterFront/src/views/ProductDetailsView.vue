@@ -52,35 +52,26 @@ const fetchProductDetails = async () => {
     product.value = await daoProducts.getById(productId);
     userData.value = product.value.userModel.id;
 
-    const allReviews = await daoReviews.getAll();
-    const allResponses = await daoResponse.getAll(); // <-- carrega todas as respostas
-    
+    const allResponses = await daoResponse.getAll();
 
-    const reviewIdsFromProduct = product.value.reviewModels.map(
-      (review) => review.id
-    );
+    reviews.value = product.value.reviewModels || [];
 
-    // Filtra os reviews do produto
-    reviews.value = allReviews.filter((review) =>
-      reviewIdsFromProduct.includes(review.id)
-    );
-
-    // Agrupa respostas por reviewId
     const groupedResponses = {};
-    allResponses.forEach((resp) => {
-      if (!groupedResponses[resp.reviewId]) {
-        groupedResponses[resp.reviewId] = [];
+    allResponses.forEach((response) => {
+      if (response.review && response.review.id) {
+        const reviewId = response.review.id;
+        if (!groupedResponses[reviewId]) {
+          groupedResponses[reviewId] = [];
+        }
+        groupedResponses[reviewId].push(response);
       }
-      groupedResponses[resp.reviewId].push(resp);
     });
 
-    // Atribui as respostas a cada review
     reviews.value.forEach((review) => {
       review.responses = groupedResponses[review.id] || [];
       responseStates.value[review.id] = { comment: "" };
     });
 
-    // Média das avaliações
     if (reviews.value.length > 0) {
       averageRating.value = (
         reviews.value.reduce((sum, review) => sum + review.rating, 0) /
@@ -106,52 +97,47 @@ const submitReview = async () => {
 
   try {
     await daoReviews.insert(review);
-    reviews.value.unshift(review);
-
-    averageRating.value = (
-      reviews.value.reduce((sum, review) => sum + review.rating, 0) /
-      reviews.value.length
-    ).toFixed(1);
+    await fetchProductDetails();
 
     newReview.value.comment = "";
     newReview.value.rating = "";
 
     triggerAlert("Avaliação enviada com sucesso!", "success");
   } catch (error) {
-    console.log(userData.value);
     console.error("Erro ao enviar avaliação:", error);
-    triggerAlert(
-      "Ocorreu um erro ao enviar sua avaliação. Tente novamente.",
-      "danger"
-    );
+    triggerAlert("Ocorreu um erro ao enviar sua avaliação.", "danger");
   }
 };
 
 const submitResponse = async (review, values, { resetForm }) => {
   try {
-    const response = {
+    const responsePayload = {
       userId: userID.value,
       name: userName.value,
       comment: responseStates.value[review.id]?.comment || "",
       createdAt: new Date().toISOString(),
-      reviewId: review.id
+      reviewId: review.id,
     };
 
-    console.log("Enviando resposta:", response);
-    await daoResponse.insert(response);
-    console.log("Resposta enviada com sucesso");
-    if (!review.responses) review.responses = [];
-    review.responses.push(response);
+    console.log("Enviando resposta:", responsePayload);
+    const newResponse = await daoResponse.insert(responsePayload);
+    console.log("Resposta enviada com sucesso:", newResponse);
+
+    if (!review.responses) {
+      review.responses = [];
+    }
+    review.responses.push(newResponse);
+
     responseStates.value[review.id].comment = "";
     resetForm();
   } catch (error) {
     console.error("Erro ao enviar resposta:", error);
+    triggerAlert("Erro ao enviar resposta.", "danger");
   }
 };
 
 onMounted(() => {
   fetchProductDetails();
-
 });
 </script>
 
@@ -330,13 +316,14 @@ onMounted(() => {
               <p class="mb-0">{{ review.comment }}</p>
 
               <div
-                v-if="review.responses && review.responses.length > 0"
+                v-if="review.id && review.responses.length > 0"
                 class="bg-light rounded-3 p-4 mt-3"
               >
                 <h5 class="fw-bold mb-4">Respostas da Loja</h5>
+
                 <div
-                  v-for="(response, index) in review.responses"
-                  :key="index"
+                  v-for="response in review.responses"
+                  :key="response.id"
                   class="bg-white rounded-3 p-3 mb-3 shadow-sm"
                 >
                   <div class="mb-3">
