@@ -1,18 +1,23 @@
 <script setup>
 import CustomButton from '@/components/CustomButton.vue';
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { authState } from '@/services/AuthService';
 import ProductDAO from '@/services/ProductDAO';
-import GenericDAO from '@/services/GenericDAO';
-
-const userName = computed(() => authState.userName);
-const userType = computed(() => authState.userRole);
-const userEmail = computed(() => authState.userEmail);
+import UserDAO from '@/services/UserDAO';
 
 const router = useRouter();
 const daoProducts = new ProductDAO();
-const userDAO = new GenericDAO('user');
+const userDAO = new UserDAO();
+
+const userData = ref({
+  name: '',
+  email: '',
+  type: '',
+  image: '',
+  backGroundColor: '#000000',
+});
+
 const products = ref([]);
 const alertMessage = ref(null);
 const alertType = ref('success');
@@ -20,6 +25,22 @@ const showAlert = ref(false);
 const viewType = ref('columns');
 const isEditingUserName = ref(false);
 const newUserName = ref('');
+
+const loadData = async () => {
+  try {
+    const data = await userDAO.getUserData();
+    userData.value = {
+      name: data.name || '',
+      email: data.email || '',
+      type: data.role || '',
+      image: data.image || '',
+      backGroundColor: data.backGroundColor || '#000000',
+    };
+  } catch (error) {
+    console.error('Erro ao carregar dados:', error);
+    triggerAlert('Erro ao carregar dados.', 'danger');
+  }
+};
 
 const triggerAlert = (message, type = 'success') => {
   alertMessage.value = message;
@@ -29,11 +50,10 @@ const triggerAlert = (message, type = 'success') => {
 };
 
 const viewTypeColumns = () => { viewType.value = 'columns'; };
-
 const viewTypeList = () => { viewType.value = 'list'; };
 
 const editUserName = () => {
-  newUserName.value = authState.userName;
+  newUserName.value = userData.value.name || '';
   isEditingUserName.value = true;
 };
 
@@ -43,15 +63,14 @@ const cancelEditUserName = () => {
 };
 
 const updateUserName = async () => {
-  const updatedName = newUserName.value.trim();
+  const updatedName = (newUserName.value || '').trim();
   if (!updatedName) return;
 
   isEditingUserName.value = false;
   try {
     await userDAO.update(authState.userId, { name: updatedName });
-
+    userData.value.name = updatedName;
     authState.userName = updatedName;
-
     newUserName.value = '';
     triggerAlert('Nome atualizado com sucesso!');
   } catch (error) {
@@ -62,9 +81,17 @@ const updateUserName = async () => {
 
 const fetchProducts = async () => {
   try {
-    products.value = await daoProducts.getMyProducts(); ;
+    products.value = await daoProducts.getMyProducts();
   } catch (error) {
     console.error('Erro ao buscar produtos:', error);
+  }
+};
+const updateBackgroundColor = async () => {
+  try {
+    await userDAO.update(authState.userId, { backGroundColor: userData.value.backGroundColor });
+    triggerAlert('Cor de fundo atualizada com sucesso!', 'success');
+  } catch (error) {
+    triggerAlert('Erro ao atualizar a cor de fundo.', 'danger');
   }
 };
 
@@ -89,40 +116,55 @@ const goToDetails = (productId) => {
   router.push({ name: 'productDetail', params: { id: productId } });
 };
 
-onMounted(() => {
-  fetchProducts();
+onMounted(async () => {
+  await loadData();
+  await fetchProducts();
+  await console.log(userData.value)
 });
 </script>
 
 
+
 <template>
-  <div class="text-white d-flex flex-row profile-background position-relative">
-    <CustomButton class="position-absolute top-0 end-0 m-3 me-4" @click="editUserName"><i
-        class="bi bi-pencil-square"></i>
-    </CustomButton>
-    <div class="ms-5 mt-5 d-flex flex-column">
-      <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-profiles/avatar-1.webp" alt="Profile Logo"
-        class="img-fluid img-thumbnail mt-4 mb-2 rounded-pill profile-logo">
+  <div class="text-white d-flex flex-row profile-background position-relative"
+    :style="{ backgroundColor: userData.backGroundColor }">
+
+    <div class="position-absolute top-0 end-0 m-3 d-flex gap-2 align-items-center">
+      <CustomButton @click="editUserName">
+        <i class="bi bi-pencil-square"></i>
+      </CustomButton>
+
+      <CustomButton>
+        <label class="m-0 d-flex align-items-center gap-1">
+          <i class="bi bi-palette-fill"></i>
+          <input type="color" v-model="userData.backGroundColor" class="color-picker-hidden"
+            @change="updateBackgroundColor" />
+        </label>
+      </CustomButton>
     </div>
-    <div class="ms-3 ">
-      <div class="hstack gap-2">
-        <h5 class="profile-text" v-if="!isEditingUserName">{{ userName }}</h5>
-        <input v-if="isEditingUserName" v-model="newUserName" type="text" class="form-control" />
+
+    <div class="ms-5 mt-5 d-flex flex-column">
+      <img :src="userData.image || 'https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-profiles/avatar-1.webp'"
+        alt="Profile Logo" class="img-fluid img-thumbnail mb-2 rounded-pill profile-logo" />
+    </div>
+
+    <div class="ms-3 user-info">
+      <div class="hstack gap-2 align-items-center">
+        <h5 v-if="!isEditingUserName" class="profile-text">{{ userData.name }}</h5>
+        <input v-if="isEditingUserName" v-model="newUserName" type="text" class="form-control input-name" />
         <div class="hstack gap-2" v-if="isEditingUserName">
-          <CustomButton class="button me-1 form-control" @click="updateUserName" :disabled="!newUserName.trim()">
+          <CustomButton @click="updateUserName" :disabled="!(newUserName?.trim?.() ?? '')">
             Salvar
           </CustomButton>
-          <CustomButton class="button form-control" @click="cancelEditUserName">
+          <CustomButton @click="cancelEditUserName">
             Cancelar
           </CustomButton>
         </div>
       </div>
-
-      <h5>{{ userEmail }}</h5>
-
-
+      <h5 class="email-text">{{ userData.email }}</h5>
     </div>
   </div>
+
   <div v-if="showAlert" :class="`alert alert-${alertType} alert-dismissible fade show custom-alert m-3`" role="alert">
     <i v-if="alertType === 'success'" class="bi bi-check-circle-fill"></i>
     <i v-if="alertType === 'warning'" class="bi bi-exclamation-triangle-fill"></i>
@@ -131,7 +173,7 @@ onMounted(() => {
     <button type="button" class="btn-close" @click="showAlert = false"></button>
   </div>
 
-  <div class="container-fluid pb-3 bg-white" v-if="userType !== 'individual'">
+  <div class="container-fluid pb-3 bg-white" v-if="userData.type !== 'individual'">
     <div class="container-fluid d-flex">
       <div class="hstack gap-3 mt-5 me-auto">
         <RouterLink to="/brand">
@@ -149,7 +191,6 @@ onMounted(() => {
         <CustomButton class="mt-3" @click="viewTypeList"><i class="bi bi-list-nested"></i></CustomButton>
       </div>
     </div>
-
 
     <div class="container-fluid mt-5 mb-5 col-md-11" v-if="viewType === 'columns'">
       <div class="row row-cols-1 row-cols-md-6 g-4">
@@ -172,7 +213,6 @@ onMounted(() => {
               <CustomButton @click.stop="deleteProduct(product.id)" class="action-button">
                 <i class="bi bi-trash-fill"></i>
               </CustomButton>
-
               <CustomButton @click.stop="goToUpdate(product.id)" class="action-button">
                 <i class="bi bi-pencil-square"></i>
               </CustomButton>
@@ -181,53 +221,51 @@ onMounted(() => {
         </div>
       </div>
     </div>
+
     <div class="mt-3 pt-5 text-body" v-if="viewType == 'list'">
-      <div>
-        <div class="card-body p-4">
-          <div class="table-responsive">
-            <table class="table table-striped table-bordered">
-              <thead>
-                <tr>
-                  <th scope="col">Imagem</th>
-                  <th scope="col">Nome</th>
-                  <th scope="col">
-                    <span class="m-3">Marca</span>
-                  </th>
-                  <th scope="col">Preço</th>
-                  <th scope="col">Tipo</th>
-                  <th scope="col">Descrição</th>
-                  <th scope="col">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="product in products" :key="product.id">
-                  <td>
-                    <div class="d-flex justify-content-center align-items-center img-container-list">
-                      <img class="img-fluid rounded-2 product-img-list" :src="product.image" :alt="product.name">
-                    </div>
-                  </td>
-                  <td class="card-text">{{ product.name }}</td>
-                  <td class="card-text">{{ product.brandModel?.name || 'Sem Marca' }}</td>
-                  <td class="price">R$ {{ product.price }}</td>
-                  <td class="card-text">{{ product.type }}</td>
-                  <td class="card-text">{{ product.description }}</td>
-                  <td>
-                    <CustomButton @click="deleteProduct(product.id)" type="button" class=" ms-2 me-2">
-                      <i class="bi bi-trash-fill"></i>
-                    </CustomButton>
-                    <CustomButton @click="goToUpdate(product.id)" type="button" class="ms-2 me-2">
-                      <i class="bi bi-pencil-square"></i>
-                    </CustomButton>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+      <div class="card-body p-4">
+        <div class="table-responsive">
+          <table class="table table-striped table-bordered">
+            <thead>
+              <tr>
+                <th>Imagem</th>
+                <th>Nome</th>
+                <th>Marca</th>
+                <th>Preço</th>
+                <th>Tipo</th>
+                <th>Descrição</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="product in products" :key="product.id">
+                <td>
+                  <div class="d-flex justify-content-center align-items-center img-container-list">
+                    <img class="img-fluid rounded-2 product-img-list" :src="product.image" :alt="product.name">
+                  </div>
+                </td>
+                <td>{{ product.name }}</td>
+                <td>{{ product.brandModel?.name || 'Sem Marca' }}</td>
+                <td class="price">R$ {{ product.price }}</td>
+                <td>{{ product.type }}</td>
+                <td>{{ product.description }}</td>
+                <td>
+                  <CustomButton @click="deleteProduct(product.id)" class="ms-2 me-2">
+                    <i class="bi bi-trash-fill"></i>
+                  </CustomButton>
+                  <CustomButton @click="goToUpdate(product.id)" class="ms-2 me-2">
+                    <i class="bi bi-pencil-square"></i>
+                  </CustomButton>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
   </div>
 </template>
+
 
 <style scoped>
 .profile-text {
@@ -241,7 +279,6 @@ onMounted(() => {
 }
 
 .profile-background {
-  background-color: #000;
   height: 200px;
 }
 
@@ -254,7 +291,7 @@ onMounted(() => {
   position: relative;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .img-container {
@@ -311,5 +348,11 @@ onMounted(() => {
 
 .product-card:hover .content-card {
   filter: blur(4px);
+}
+
+.color-picker-hidden {
+  opacity: 0;
+  position: absolute;
+  cursor: pointer;
 }
 </style>

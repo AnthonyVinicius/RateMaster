@@ -297,7 +297,7 @@ onMounted(() => {
       </Form>
     </div>
 
-    <div class="mt-5">
+    <div class="mt-5 mb-5">
       <h2 class="mb-4 fw-bold">Avaliações dos Clientes</h2>
       <div v-if="reviews.length === 0" class="mb-5">
         Ainda não há avaliações para este produto.

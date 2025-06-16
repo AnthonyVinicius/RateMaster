@@ -21,9 +21,12 @@ public class UserModel implements UserDetails {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     private String name;
+    private String backGroundColor;
     private String email;
     private String password;
     private UserRole role;
+    @Column(columnDefinition = "TEXT")
+    private String image;
 
     public UserModel(String name, String email, String password, UserRole role){
         this.name = name;

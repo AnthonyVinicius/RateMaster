@@ -58,7 +58,11 @@ const fetchProduct = async () => {
 
   try {
     const fetchedProduct = await daoProducts.getById(productId);
-    product.value = { ...fetchedProduct };
+    product.value = {
+      ...fetchedProduct,
+      brandModel: fetchedProduct.brandModel?.id || '',
+      categoryModel: fetchedProduct.categoryModel?.id || '',
+    };
     priceInput.value = product.value.price.toLocaleString('pt-BR', {
       style: 'currency',
       currency: 'BRL',
@@ -72,7 +76,7 @@ const fetchProduct = async () => {
 };
 
 
-  const submit = async () => {
+const submit = async () => {
   const name = product.value.name.trim();
   const description = product.value.description.trim();
   const price = product.value.price;
@@ -100,7 +104,6 @@ const fetchProduct = async () => {
   } catch (error) {
     console.error(error);
     triggerAlert('Erro ao atualizar o produto.', 'danger');
-    console.log(productData)
   }
 };
 
@@ -149,8 +152,7 @@ onMounted(() => {
           <div class="card border-0 shadow-sm">
             <div class="card-body p-4">
               <h5 class="card-title mb-4">Imagem do Produto</h5>
-              <div class="image-preview rounded bg-light mb-3 d-flex align-items-center justify-content-center"
-                :style="{ backgroundImage: product.image ? `url(${product.image})` : 'none' }">
+              <div class="image-preview rounded bg-light mb-3 d-flex align-items-center justify-content-center">
                 <div v-if="!product.image" class="text-center text-secondary">
                   <i class="bi bi-image fs-1"></i>
                   <p class="mt-2 mb-0">Pré-visualização</p>
@@ -172,9 +174,10 @@ onMounted(() => {
               <h5 class="card-title mb-4">Editar Produto</h5>
               <form @submit.prevent="submit">
                 <div class="form-floating mb-3">
-                <input v-model="product.name" type="text" class="form-control" id="productName" placeholder="Digite o nome do produto" required />
-                <label for="productName">Nome do Produto</label>
-              </div>
+                  <input v-model="product.name" type="text" class="form-control" id="productName"
+                    placeholder="Digite o nome do produto" required />
+                  <label for="productName">Nome do Produto</label>
+                </div>
 
                 <div class="form-floating mb-3">
                   <textarea v-model="product.description" class="form-control" id="description"
@@ -185,7 +188,8 @@ onMounted(() => {
                 <div class="row g-3 mb-3">
                   <div class="col-md-6">
                     <div class="form-floating">
-                      <input v-model="priceInput" type="text" class="form-control" placeholder="R$ 0,00" required @input="formatPrice" />
+                      <input v-model="priceInput" type="text" class="form-control" placeholder="R$ 0,00" required
+                        @input="formatPrice" />
                       <label>Preço</label>
                     </div>
                   </div>
@@ -229,8 +233,8 @@ onMounted(() => {
                       </select>
                       <label>Categoria</label>
                     </div>
-                    
-                    
+
+
                     <RouterLink to="/category" class="d-flex align-items-center">
                       <CustomButton>
                         <i class="bi bi-plus-lg"></i>
@@ -254,15 +258,17 @@ onMounted(() => {
 <style scoped>
 .image-preview {
   height: 300px;
-  background-size: cover;
-  background-position: center;
-  overflow: hidden;
+  background-color: #f8f9fa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #ddd;
 }
 
 .image-preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 
 .form-control:focus,
@@ -314,21 +320,23 @@ img {
 button:hover {
   transform: scale(1.01);
 }
+
 .custom-alert {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    animation: fadeIn 0.5s;
-    margin-bottom: 20px;
-    font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: fadeIn 0.5s;
+  margin-bottom: 20px;
+  font-size: 1rem;
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 </style>

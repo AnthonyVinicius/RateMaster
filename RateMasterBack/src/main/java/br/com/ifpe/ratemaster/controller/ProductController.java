@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -58,9 +57,7 @@ public class ProductController {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        System.out.println("User ID: " + user.getId());
         List<ProductModel> products = productService.findByUserId(user.getId());
-        System.out.println("Produtos encontrados: " + (products == null ? "null" : products.size()));
         return ResponseEntity.ok(products);
     }
 
@@ -77,6 +74,7 @@ public class ProductController {
         product.setPrice(dto.price);
         product.setBrandModel(brand);
         product.setCategoryModel(category);
+        product.setType(dto.type);
         product.setImage(dto.image);
         product.setUserModel(user);
 
@@ -94,6 +92,7 @@ public class ProductController {
         return productService.findProductById(id).map(existingProduct -> {
             existingProduct.setName(dto.name);
             existingProduct.setDescription(dto.description);
+            existingProduct.setType(dto.type);
             existingProduct.setPrice(dto.price);
             existingProduct.setImage(dto.image);
 

@@ -23,5 +23,4 @@ public class ProductService {
     public void deleteProduct(Long id) {productRepository.deleteById(id);}
 
     public List<ProductModel> findProductByCategory(String name) {return productRepository.findByCategoryModelName(name); }
-
 }

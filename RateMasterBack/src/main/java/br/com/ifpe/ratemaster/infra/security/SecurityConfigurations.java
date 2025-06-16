@@ -37,6 +37,7 @@ public class SecurityConfigurations {
                         .requestMatchers(HttpMethod.POST, "/api/user/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/user").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/user/{id}").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/user/me").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/user/update/*").authenticated()
                         // Brand
                         .requestMatchers(HttpMethod.GET, "/api/brand").permitAll()
