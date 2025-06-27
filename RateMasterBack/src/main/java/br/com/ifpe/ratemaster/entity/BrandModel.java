@@ -1,7 +1,18 @@
 package br.com.ifpe.ratemaster.entity;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
 
 @Entity
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "tb_brand")
 public class BrandModel {
     @Id
@@ -11,24 +22,8 @@ public class BrandModel {
     @Column(unique = true)
     private String name;
 
+    @OneToMany(mappedBy = "brandModel", fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<ProductModel> products;
 
-    public BrandModel(long id, String name) {
-        this.id = id;
-        this.name = name;
-    }
-
-    public BrandModel() {
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 }
