@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import GenericDAO from '@/services/GenericDAO';
 import ProductDAO from '@/services/ProductDAO';
@@ -10,14 +10,17 @@ const daoUser = new GenericDAO('user');
 const router = useRouter();
 
 const products = ref([]);
+const reviews = ref([]);
+const companies = ref([]);
+const searchQuery = ref('');
 const filters = ref({
     price: [],
     rating: []
 });
-const reviews = ref([]);
-const companies = ref([]);
-const searchQuery = ref('');
-
+const selectedCategory = ref('Todas');
+const categories = ref([]);
+const currentPage = ref(1);
+const itemsPerPage = ref(10);
 
 const fetchProducts = async () => {
     try {
@@ -25,25 +28,16 @@ const fetchProducts = async () => {
         companies.value = await daoUser.getAll();
         reviews.value = await daoReviews.getAll();
 
-
         products.value.forEach(product => {
             const productReviews = product.reviewModels || [];
-
             const totalRating = productReviews.reduce((sum, review) => sum + review.rating, 0);
-
-            if (productReviews.length > 0) {
-                product.averageRating = (totalRating / productReviews.length).toFixed(1);
-            } else {
-                product.averageRating = 0;
-            }
-
-            if (productReviews.length > 0) {
-                product.averageRating = (totalRating / productReviews.length).toFixed(1);
-            } else {
-                product.averageRating = 0;
-            }
+            product.averageRating = productReviews.length > 0
+                ? (totalRating / productReviews.length).toFixed(1)
+                : 0;
         });
-        
+
+        const allCategories = products.value.map(p => p.categoryModel?.name || 'Sem categoria');
+        categories.value = [...new Set(allCategories)];
 
     } catch (error) {
         console.error('Erro ao carregar produtos:', error);
@@ -69,11 +63,32 @@ const filterProducts = computed(() => {
             return parseFloat(rating) === Math.floor(product.averageRating);
         });
 
-        return equalPrice && equalRating && matchSearch;
+        const equalCategory = selectedCategory.value === 'Todas' ||
+            product.categoryModel?.name === selectedCategory.value;
+
+        return equalPrice && equalRating && matchSearch && equalCategory;
     });
 });
 
+const paginatedProducts = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage.value;
+    const end = start + itemsPerPage.value;
+    return filterProducts.value.slice(start, end);
+});
 
+const pageCount = computed(() => {
+    return Math.ceil(filterProducts.value.length / itemsPerPage.value);
+});
+
+const goToPage = (page) => {
+    if (page >= 1 && page <= pageCount.value) {
+        currentPage.value = page;
+    }
+};
+
+watch([filters, selectedCategory, searchQuery], () => {
+    currentPage.value = 1;
+});
 
 const goToDetails = (productId) => {
     router.push({ name: 'productDetail', params: { id: productId } });
@@ -87,11 +102,11 @@ onMounted(() => {
 <template>
     <div class="container-fluid pe-5 ps-5">
         <div class="d-flex flex-column  mt-4 mb-4">
-                <h1 class="header ms-auto me-auto align-items-center ">Descubra nossos Produtos</h1>
-                <div class="form-floating search-bar container search-container">
-                    <input type="search" v-model="searchQuery" class="form-control" id="floatingInput" placeholder="Procurar produto..." />
-                    <label class="ms-3" for="floatingInput"><i class="bi bi-search"></i> Procurar produto...</label>
-                </div>
+            <h1 class="header ms-auto me-auto align-items-center ">Descubra nossos Produtos</h1>
+            <div class="form-floating search-bar container search-container">
+                <input type="search" v-model="searchQuery" class="form-control" id="floatingInput" placeholder="Procurar produto..." />
+                <label class="ms-3" for="floatingInput"><i class="bi bi-search"></i> Procurar produto...</label>
+            </div>
         </div>
 
         <div class="row d-flex mt-5">
@@ -99,10 +114,23 @@ onMounted(() => {
                 <aside class="bg-white p-4 pb-5 rounded-3 shadow-sm">
                     <div class="hstack mb-4">
                         <h6 class="filter-text m-0 p-0">Filtros</h6>
-                        <button class="btn ms-auto clear-filters rounded-pill" @click="filters = { price: [], rating: [] }">
-                            Clear All
+                        <button class="btn ms-auto clear-filters rounded-pill" @click="() => {
+                            filters.price = [];
+                            filters.rating = [];
+                            selectedCategory = 'Todas';
+                        }">
+                            Limpar Filtros
                         </button>
                     </div>
+
+                    <h6 class="filter-text">Categoria</h6>
+                    <div class="mb-3">
+                        <select class="form-select" v-model="selectedCategory">
+                            <option value="Todas">Todas</option>
+                            <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+                        </select>
+                    </div>
+
                     <h6 class="filter-text">Preço</h6>
                     <div class="vstack mb-3 filter-section checkbox">
                         <label><input type="checkbox" v-model="filters.price" value="0-50"> R$0 - R$50</label>
@@ -127,11 +155,11 @@ onMounted(() => {
 
             <div class="mb-5 col-md-10">
                 <div class="row row-cols-1 row-cols-md-5 g-4">
-                    <div class="col" v-for="product in filterProducts" :key="product.id"
+                    <div class="col" v-for="product in paginatedProducts" :key="product.id"
                         @click="goToDetails(product.id)">
                         <div class="card rounded-3 text-truncate">
                             <div class="d-flex justify-content-center align-items-center img-container">
-                                <img class="img-fluid  product-img" :src="product.image" :alt="product.name">
+                                <img class="img-fluid product-img" :src="product.image" :alt="product.name">
                             </div>
 
                             <div class="card-body">
@@ -148,7 +176,7 @@ onMounted(() => {
                                         <p class="card-text text-truncate">{{ product.brandModel.name }}</p>
                                     </div>
                                     
-                                   <div class="d-flex flex-column">
+                                    <div class="d-flex flex-column">
                                         <p class="price m-0 text-truncate">R$ {{ product.price }}</p>
                                         <p class="card-text text-truncate mt-1">{{ product.userModel?.name || 'Empresa desconhecida' }}</p>
                                     </div>
@@ -159,11 +187,31 @@ onMounted(() => {
                 </div>
             </div>
         </div>
+        <div class="d-flex justify-content-center mt-4">
+    <nav>
+      <ul class="pagination">
+        <li class="page-item" :class="{ disabled: currentPage === 1 }">
+          <button class="page-link" @click="goToPage(currentPage - 1)">Anterior</button>
+        </li>
+
+        <li class="page-item" v-for="page in pageCount" :key="page" :class="{ active: page === currentPage }">
+          <button class="page-link" @click="goToPage(page)">{{ page }}</button>
+        </li>
+
+        <li class="page-item" :class="{ disabled: currentPage === pageCount }">
+          <button class="page-link" @click="goToPage(currentPage + 1)">Próxima</button>
+        </li>
+      </ul>
+    </nav>
+  </div>
     </div>
 </template>
 
-
 <style scoped>
+.pagination .page-link {
+  cursor: pointer;
+}
+
 .filter-section label {
     cursor: pointer;
 }
@@ -200,7 +248,6 @@ onMounted(() => {
     transition: all 0.3s ease;
 }
 
-
 .img-container {
     width: 100%;
     height: 150px;
@@ -216,6 +263,7 @@ onMounted(() => {
     border: none;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 }
+
 .clear-filters {
     color: #666;
     font-size: 0.9rem;

@@ -117,7 +117,7 @@ const toggleShowPassword = () => {
                     <label class="form-label">
                       {{ role === 'INDIVIDUAL' ? 'Nome Completo' : 'Nome da Empresa' }}
                     </label>
-                    <Field v-model="name" name="name" id="name" rules="required|min:5|max:100"
+                    <Field v-model="name" name="name" id="name" rules="required|min:3|max:100"
                       v-slot="{ field, errors, meta }">
                       <input v-bind="field" :class="{
                         'form-control': true,
