@@ -4,6 +4,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from "vue-router";
 import GenericDAO from '@/services/GenericDAO';
 import { authState } from '@/services/AuthService';
+import { computed } from 'vue';
 
 const daoBrands = new GenericDAO('brand');
 const router = useRouter();
@@ -14,8 +15,8 @@ const editedBrandName = ref('');
 const alertMessage = ref(null);
 const alertType = ref('success');
 const showAlert = ref(false);
+const auth = computed(() => authState.isLogged);
 
-const auth = authState.isLogged;
 
 
 const triggerAlert = (message, type = 'success') => {
@@ -27,7 +28,12 @@ const triggerAlert = (message, type = 'success') => {
 
 
 const showAllBrands = async () => {
-    brands.value = await daoBrands.getAll();
+    try {
+        brands.value = await daoBrands.getAll();
+    } catch (error) {
+        console.error(error);
+        triggerAlert('Erro ao carregar marcas.', 'danger');
+    }
 };
 
 const addBrand = async () => {
@@ -95,14 +101,13 @@ const updateBrand = async () => {
 
 };
 onMounted(async () => {
-    if (auth){
+    if (auth.value) {
         showAllBrands();
-    } else{
+    } else {
         alert("Usuário não logado");
-        router.push("/login")
+        router.push("/login");
     }
-    
-    
+
 });
 </script>
 
@@ -114,6 +119,9 @@ onMounted(async () => {
             <i v-if="alertType === 'danger'" class="bi bi-x-circle-fill"></i>
             {{ alertMessage }}
             <button type="button" class="btn-close" @click="showAlert = false"></button>
+        </div>
+        <div class="d-flex ">
+            <h1 class="header ms-auto me-auto"><i class="bi bi-award-fill"></i> Marcas</h1>
         </div>
         <button type="button" class="btn pb-3 back-button" @click="router.push('/myProfile')">
             ← Voltar para os produtos
@@ -152,7 +160,7 @@ onMounted(async () => {
                             </CustomButton>
                         </div>
                         <div v-else>
-                            <CustomButton @click="() => editBrand(brand)" type="button" class="btn ms-2 me-2">
+                            <CustomButton @click="editBrand(brand)" type="button" class="btn ms-2 me-2">
                                 <i class="bi bi-pencil-square"></i>
                             </CustomButton>
                             <CustomButton @click="deleteBrand(brand.id)" type="button" class="btn ms-2 me-2">
@@ -167,6 +175,12 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.header {
+    font-size: 2.5rem;
+    color: #1a1a1a;
+    font-weight: 700;
+}
+
 .custom-alert {
     display: flex;
     align-items: center;

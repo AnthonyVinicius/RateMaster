@@ -31,6 +31,7 @@ public class ResponseModel {
 
     @OneToOne
     @JoinColumn(name = "review_id", nullable = false)
+    @JsonBackReference
     private ReviewModel review;
 
 }

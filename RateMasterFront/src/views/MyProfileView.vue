@@ -25,7 +25,33 @@ const showAlert = ref(false);
 const viewType = ref('columns');
 const isEditingUserName = ref(false);
 const newUserName = ref('');
+const isEditingProfileImage = ref(false);
+const newProfileImageUrl = ref('');
 
+const editProfileImage = () => {
+  newProfileImageUrl.value = userData.value.image || '';
+  isEditingProfileImage.value = true;
+};
+
+const cancelEditProfileImage = () => {
+  isEditingProfileImage.value = false;
+  newProfileImageUrl.value = '';
+};
+
+const updateProfileImage = async () => {
+  const updatedImage = (newProfileImageUrl.value || '').trim();
+  if (!updatedImage) return;
+
+  isEditingProfileImage.value = false;
+  try {
+    await userDAO.update(authState.userId, { image: updatedImage });
+    userData.value.image = updatedImage;
+    triggerAlert('Imagem de perfil atualizada com sucesso!');
+  } catch (error) {
+    console.error("Erro ao atualizar a imagem:", error);
+    triggerAlert('Erro ao atualizar a imagem.', 'danger');
+  }
+};
 const loadData = async () => {
   try {
     const data = await userDAO.getUserData();
@@ -119,7 +145,6 @@ const goToDetails = (productId) => {
 onMounted(async () => {
   await loadData();
   await fetchProducts();
-  await console.log(userData.value)
 });
 </script>
 
@@ -143,26 +168,59 @@ onMounted(async () => {
       </CustomButton>
     </div>
 
-    <div class="ms-5 mt-5 d-flex flex-column">
-      <img :src="userData.image || 'https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-profiles/avatar-1.webp'"
-        alt="Profile Logo" class="img-fluid img-thumbnail mb-2 rounded-pill profile-logo" />
-    </div>
+    <div class="ms-5 mt-5 d-flex flex-column profile-logo-container">
+      <div class="profile-image-wrapper">
+        <img
+          :src="userData.image || 'https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-profiles/avatar-1.webp'"
+          alt="Profile Logo" class="img-fluid img-thumbnail mb-2 rounded-pill profile-logo" />
+        <div class="overlay flex-column gap-2 p-2">
+          <div v-if="!isEditingProfileImage">
+            <CustomButton @click="editProfileImage">
+              <i class="bi bi-pencil-square"></i>
+            </CustomButton>
+          </div>
+          <div v-else class="edit-image-container w-100">
+            <input v-model="newProfileImageUrl" type="text" placeholder="URL da nova imagem"
+              class="form-control form-control-sm rounded-2 mb-2" />
+            <div class="d-flex gap-2 justify-content-center">
+              <CustomButton @click="updateProfileImage" :disabled="!(newProfileImageUrl?.trim?.() ?? '')" size="sm">
+                Salvar
+              </CustomButton>
+              <CustomButton @click="cancelEditProfileImage" variant="secondary" size="sm">Cancelar</CustomButton>
+            </div>
+          </div>
+        </div>
 
-    <div class="ms-3 user-info">
-      <div class="hstack gap-2 align-items-center">
+      </div>
+    </div>
+    <div class="ms-4 user-info d-flex">
+      <div class="d-flex flex-column justify-content-center">
+
         <h5 v-if="!isEditingUserName" class="profile-text">{{ userData.name }}</h5>
-        <input v-if="isEditingUserName" v-model="newUserName" type="text" class="form-control input-name" />
+
+
         <div class="hstack gap-2" v-if="isEditingUserName">
+
+          <input v-if="isEditingUserName" v-model="newUserName" type="text" class="form-control input-name" />
+
           <CustomButton @click="updateUserName" :disabled="!(newUserName?.trim?.() ?? '')">
             Salvar
           </CustomButton>
+
           <CustomButton @click="cancelEditUserName">
             Cancelar
           </CustomButton>
+
         </div>
+
+        <h5 class="email-text">{{ userData.email }}</h5>
+
       </div>
-      <h5 class="email-text">{{ userData.email }}</h5>
+
+
     </div>
+
+
   </div>
 
   <div v-if="showAlert" :class="`alert alert-${alertType} alert-dismissible fade show custom-alert m-3`" role="alert">
@@ -204,7 +262,8 @@ onMounted(async () => {
                 <div class="hstack">
                   <h4 class="fw-bold text-truncate">{{ product.name }}</h4>
                 </div>
-                <p class="card-text text-truncate">Marca: <strong>{{ product.brandModel?.name || 'Sem Marca' }}</strong></p>
+                <p class="card-text text-truncate">Marca: <strong>{{ product.brandModel?.name || 'Sem Marca' }}</strong>
+                </p>
                 <p class="card-text text-truncate">{{ product.description }}</p>
                 <p class="price text-truncate">R$ {{ product.price }}</p>
               </div>
@@ -269,22 +328,75 @@ onMounted(async () => {
 
 <style scoped>
 .profile-text {
-  margin-top: 100px;
+  margin-top: 60px;
   font-size: 2rem;
   font-weight: 600;
-}
-
-.form-control {
-  margin-top: 100px;
 }
 
 .profile-background {
   height: 200px;
 }
 
+.profile-logo-container {
+  position: relative;
+  width: 150px;
+}
+
+.profile-image-wrapper {
+  position: relative;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
 .profile-logo {
   width: 150px;
-  z-index: 1;
+  height: 150px;
+  border-radius: 50%;
+  transition: filter 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  object-fit: cover;
+}
+
+.profile-image-wrapper:hover .profile-logo {
+  filter: blur(4px);
+  transform: scale(1.05);
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  cursor: pointer;
+}
+.edit-image-container input {
+  font-size: 0.8rem;
+}
+
+.overlay {
+  flex-direction: column;
+  padding: 10px;
+  text-align: center;
+}
+
+.overlay input::placeholder {
+  font-size: 0.75rem;
+}
+
+.profile-image-wrapper:hover .overlay {
+  opacity: 1;
+}
+
+.pencil-icon {
+  font-size: 2rem;
 }
 
 .product-img {

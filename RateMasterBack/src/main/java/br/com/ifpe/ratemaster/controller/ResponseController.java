@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/response")
@@ -27,23 +28,28 @@ public class ResponseController {
     private UserService userService;
 
     @GetMapping
-    public List<ResponseModel> getAllResponses() {
-        return responseService.getAllResponses();
+    public List<ResponseDTO> getAllResponses() {
+        return responseService.getAllResponses()
+                .stream()
+                .map(ResponseDTO::new)
+                .collect(Collectors.toList());
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ResponseModel> insertResponse(@RequestBody ResponseDTO dto) {
-        ReviewModel review = reviewService.findReviewById(dto.reviewId).orElseThrow();
-        UserModel user = userService.findUserById(dto.userId).orElseThrow();
+    public ResponseEntity<ResponseDTO> insertResponse(@RequestBody ResponseDTO dto) {
+        ReviewModel review = reviewService.findReviewById(dto.getReviewId())
+                .orElseThrow(() -> new RuntimeException("Review não encontrada"));
+        UserModel user = userService.findUserById(dto.getUserId())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
         ResponseModel response = new ResponseModel();
-        response.setComment(dto.comment);
-        response.setCreatedAt(dto.createdAt);
+        response.setComment(dto.getComment());
+        response.setCreatedAt(dto.getCreatedAt());
         response.setUserModel(user);
-        response.setName(dto.name);
+        response.setName(dto.getName());
         response.setReview(review);
 
         ResponseModel saved = responseService.saveResponse(response);
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.ok(new ResponseDTO(saved));
     }
 }

@@ -95,13 +95,13 @@ const updateCategory = async () => {
 
 };
 onMounted(async () => {
-    if(auth){
+    if (auth) {
         showAllCategories();
     } else {
         alert("Usuário não logado");
         router.push("/login");
     }
-    
+
 });
 
 </script>
@@ -114,6 +114,9 @@ onMounted(async () => {
             <i v-if="alertType === 'danger'" class="bi bi-x-circle-fill"></i>
             {{ alertMessage }}
             <button type="button" class="btn-close" @click="showAlert = false"></button>
+        </div>
+        <div class="d-flex ">
+            <h1 class="header ms-auto me-auto"><i class="bi bi-bookmarks-fill"></i> Categorias</h1>
         </div>
         <button type="button" class="btn pb-3 back-button" @click="router.push('/myProfile')">
             ← Voltar para os produtos
@@ -167,6 +170,11 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.header {
+    font-size: 2.5rem;
+    color: #1a1a1a;
+    font-weight: 700;
+}
 .custom-alert {
     display: flex;
     align-items: center;

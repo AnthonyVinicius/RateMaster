@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Entity
 @Getter
 @Setter
@@ -21,9 +19,5 @@ public class BrandModel {
 
     @Column(unique = true)
     private String name;
-
-    @OneToMany(mappedBy = "brandModel", fetch = FetchType.LAZY)
-    @JsonManagedReference
-    private List<ProductModel> products;
 
 }
