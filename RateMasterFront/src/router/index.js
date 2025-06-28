@@ -16,6 +16,7 @@ const router = createRouter({
 
     { path: '/product/:id', name: 'productDetail', meta: { requireAuth: true }, component: () => import('../views/ProductDetailsView.vue') },
     { path: '/myProfile', name: 'myProfile', meta: { requireAuth: true }, component: () => import('../views/MyProfileView.vue') },
+    { path: '/shopProfile/:id', name: 'shopProfile', meta: { requireAuth: true }, component: () => import('../views/ShopProfileView.vue') },
     { path: '/unauthorized', name: 'Unauthorized', component: () => import('../views/UnauthorizedView.vue') },
   ],
 });

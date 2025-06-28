@@ -3,14 +3,16 @@ import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import GenericDAO from '@/services/GenericDAO';
 import ProductDAO from '@/services/ProductDAO';
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import { Navigation } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
 
 const daoProducts = new ProductDAO();
-const daoReviews = new GenericDAO('review');
 const daoUser = new GenericDAO('user');
 const router = useRouter();
 
 const products = ref([]);
-const reviews = ref([]);
 const companies = ref([]);
 const searchQuery = ref('');
 const filters = ref({
@@ -20,13 +22,12 @@ const filters = ref({
 const selectedCategory = ref('Todas');
 const categories = ref([]);
 const currentPage = ref(1);
-const itemsPerPage = ref(10);
+const itemsPerPage = ref(2);
 
 const fetchProducts = async () => {
     try {
         products.value = await daoProducts.getAll();
         companies.value = await daoUser.getAll();
-        reviews.value = await daoReviews.getAll();
 
         products.value.forEach(product => {
             const productReviews = product.reviewModels || [];
@@ -38,7 +39,6 @@ const fetchProducts = async () => {
 
         const allCategories = products.value.map(p => p.categoryModel?.name || 'Sem categoria');
         categories.value = [...new Set(allCategories)];
-
     } catch (error) {
         console.error('Erro ao carregar produtos:', error);
     }
@@ -70,14 +70,26 @@ const filterProducts = computed(() => {
     });
 });
 
-const paginatedProducts = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage.value;
-    const end = start + itemsPerPage.value;
-    return filterProducts.value.slice(start, end);
+const groupedCompanies = computed(() => {
+    const groups = {};
+    filterProducts.value.forEach(product => {
+        const companyName = product.userModel?.name || 'Empresa desconhecida';
+        if (!groups[companyName]) {
+            groups[companyName] = [];
+        }
+        groups[companyName].push(product);
+    });
+    return Object.entries(groups);
 });
 
 const pageCount = computed(() => {
-    return Math.ceil(filterProducts.value.length / itemsPerPage.value);
+    return Math.ceil(groupedCompanies.value.length / itemsPerPage.value);
+});
+
+const paginatedCompanies = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage.value;
+    const end = start + itemsPerPage.value;
+    return groupedCompanies.value.slice(start, end);
 });
 
 const goToPage = (page) => {
@@ -85,6 +97,11 @@ const goToPage = (page) => {
         currentPage.value = page;
     }
 };
+
+const goToStore = (userId) => {
+    router.push({ name: 'shopProfile', params: { id: userId } });
+};
+
 
 watch([filters, selectedCategory, searchQuery], () => {
     currentPage.value = 1;
@@ -101,10 +118,11 @@ onMounted(() => {
 
 <template>
     <div class="container-fluid pe-5 ps-5">
-        <div class="d-flex flex-column  mt-4 mb-4">
-            <h1 class="header ms-auto me-auto align-items-center ">Descubra nossos Produtos</h1>
+        <div class="d-flex flex-column mt-4 mb-4">
+            <h1 class="header ms-auto me-auto align-items-center">Descubra nossos Produtos</h1>
             <div class="form-floating search-bar container search-container">
-                <input type="search" v-model="searchQuery" class="form-control" id="floatingInput" placeholder="Procurar produto..." />
+                <input type="search" v-model="searchQuery" class="form-control" id="floatingInput"
+                    placeholder="Procurar produto..." />
                 <label class="ms-3" for="floatingInput"><i class="bi bi-search"></i> Procurar produto...</label>
             </div>
         </div>
@@ -154,62 +172,92 @@ onMounted(() => {
             </section>
 
             <div class="mb-5 col-md-10">
-                <div class="row row-cols-1 row-cols-md-5 g-4">
-                    <div class="col" v-for="product in paginatedProducts" :key="product.id"
-                        @click="goToDetails(product.id)">
-                        <div class="card rounded-3 text-truncate">
-                            <div class="d-flex justify-content-center align-items-center img-container">
-                                <img class="img-fluid product-img" :src="product.image" :alt="product.name">
-                            </div>
-
-                            <div class="card-body">
-                                <div class="vstack gap-3">
-                                    <div class="hstack">
-                                        <h6 class="fw-bold text-truncate m-0">{{ product.name }}</h6>
-                                        <div class="ms-auto me-2 star">
-                                            <span class="star"><i class="bi bi-star-fill"></i></span>
-                                            {{ product.averageRating }}
+                <div v-for="[company, products] in paginatedCompanies" :key="company"
+                    class="container bg-white shadow-sm rounded-2 p-3 mb-5">
+                    <div class="d-flex align-items-center mb-3">
+                        <img :src="products[0].userModel?.image || 'default-company.png'" alt="Logo da empresa"
+                            class="company-logo me-2" />
+                        <h3 class="m-0">{{ company }}</h3>
+                        <button class="btn btn-outline-primary btn-sm ms-auto"
+                            @click="goToStore(products[0].userModel.id)">
+                            Visitar loja
+                        </button>
+                    </div>
+                    <Swiper :modules="[Navigation]" :slides-per-view="5" space-between="30" navigation
+                        class="product-swiper">
+                        <SwiperSlide v-for="product in products" :key="product.id" @click="goToDetails(product.id)">
+                            <div class="card rounded-3 text-truncate">
+                                <div class="d-flex justify-content-center align-items-center img-container">
+                                    <img class="img-fluid product-img" :src="product.image" :alt="product.name">
+                                </div>
+                                <div class="card-body">
+                                    <div class="vstack gap-3">
+                                        <div class="hstack">
+                                            <h6 class="fw-bold text-truncate m-0">{{ product.name }}</h6>
+                                            <div class="ms-auto me-2 star">
+                                                <span class="star"><i class="bi bi-star-fill"></i></span>
+                                                {{ product.averageRating }}
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="d-flex flex-column">
-                                        <p class="card-text text-truncate">{{ product.description }}</p>
-                                        <p class="card-text text-truncate">{{ product.brandModel.name }}</p>
-                                    </div>
-                                    
-                                    <div class="d-flex flex-column">
-                                        <p class="price m-0 text-truncate">R$ {{ product.price }}</p>
-                                        <p class="card-text text-truncate mt-1">{{ product.userModel?.name || 'Empresa desconhecida' }}</p>
+                                        <div class="d-flex flex-column">
+                                            <p class="card-text text-truncate">{{ product.description }}</p>
+                                            <p class="card-text text-truncate">{{ product.brandModel?.name }}</p>
+                                        </div>
+                                        <div class="d-flex flex-column">
+                                            <p class="price m-0 text-truncate">R$ {{ product.price }}</p>
+                                            <p class="card-text text-truncate mt-1">{{ product.userModel?.name ||
+                                                'Empresa desconhecida' }}</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
+                        </SwiperSlide>
+                    </Swiper>
+                </div>
+
+                <div class="d-flex justify-content-center mt-4">
+                    <nav>
+                        <ul class="pagination">
+                            <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                                <button class="page-link" @click="goToPage(currentPage - 1)">Anterior</button>
+                            </li>
+
+                            <li class="page-item" v-for="page in pageCount" :key="page"
+                                :class="{ active: page === currentPage }">
+                                <button class="page-link" @click="goToPage(page)">{{ page }}</button>
+                            </li>
+
+                            <li class="page-item" :class="{ disabled: currentPage === pageCount }">
+                                <button class="page-link" @click="goToPage(currentPage + 1)">Próxima</button>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
             </div>
         </div>
-        <div class="d-flex justify-content-center mt-4">
-    <nav>
-      <ul class="pagination">
-        <li class="page-item" :class="{ disabled: currentPage === 1 }">
-          <button class="page-link" @click="goToPage(currentPage - 1)">Anterior</button>
-        </li>
-
-        <li class="page-item" v-for="page in pageCount" :key="page" :class="{ active: page === currentPage }">
-          <button class="page-link" @click="goToPage(page)">{{ page }}</button>
-        </li>
-
-        <li class="page-item" :class="{ disabled: currentPage === pageCount }">
-          <button class="page-link" @click="goToPage(currentPage + 1)">Próxima</button>
-        </li>
-      </ul>
-    </nav>
-  </div>
     </div>
 </template>
 
 <style scoped>
+.company-logo {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
 .pagination .page-link {
-  cursor: pointer;
+    cursor: pointer;
+}
+
+.product-swiper {
+    padding: 20px 0;
+}
+
+.product-img {
+    width: 100%;
+    height: 150px;
+    object-fit: contain;
 }
 
 .filter-section label {
@@ -218,13 +266,6 @@ onMounted(() => {
 
 .checkbox {
     color: #666;
-}
-
-.product-img {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
 }
 
 .header {
