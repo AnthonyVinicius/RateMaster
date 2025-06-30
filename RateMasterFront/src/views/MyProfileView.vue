@@ -27,15 +27,15 @@ const isEditingUserName = ref(false);
 const newUserName = ref('');
 const isEditingProfileImage = ref(false);
 const newProfileImageUrl = ref('');
-
-// PAGINAÇÃO
 const currentPage = ref(1);
-const pageSize = 12; // quantidade por página
+const pageSize = 12;
 const totalPages = computed(() => Math.ceil(products.value.length / pageSize));
+
 const paginatedProducts = computed(() => {
   const start = (currentPage.value - 1) * pageSize;
   return products.value.slice(start, start + pageSize);
 });
+
 const goToPage = (page) => {
   if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page;
@@ -43,7 +43,9 @@ const goToPage = (page) => {
 };
 
 const editProfileImage = () => { newProfileImageUrl.value = userData.value.image || ''; isEditingProfileImage.value = true; };
+
 const cancelEditProfileImage = () => { isEditingProfileImage.value = false; newProfileImageUrl.value = ''; };
+
 const updateProfileImage = async () => {
   const updatedImage = (newProfileImageUrl.value || '').trim();
   if (!updatedImage) return;
@@ -82,10 +84,13 @@ const triggerAlert = (message, type = 'success') => {
 };
 
 const viewTypeColumns = () => { viewType.value = 'columns'; };
+
 const viewTypeList = () => { viewType.value = 'list'; };
 
 const editUserName = () => { newUserName.value = userData.value.name || ''; isEditingUserName.value = true; };
+
 const cancelEditUserName = () => { isEditingUserName.value = false; newUserName.value = ''; };
+
 const updateUserName = async () => {
   const updatedName = (newUserName.value || '').trim();
   if (!updatedName) return;
@@ -138,6 +143,7 @@ const disableProduct = async (id) => {
 };
 
 const goToUpdate = (productId) => { router.push({ name: 'updateProducts', params: { id: productId } }); };
+
 const goToDetails = (productId) => { router.push({ name: 'productDetail', params: { id: productId } }); };
 
 onMounted(async () => {
@@ -229,7 +235,6 @@ onMounted(async () => {
     <button type="button" class="btn-close" @click="showAlert = false"></button>
   </div>
 
-  <!-- Produtos avaliados (perfil individual) -->
   <div class="container mt-5" v-if="userData.type === 'INDIVIDUAL'">
     <h3>Produtos que você avaliou</h3>
     <div v-if="paginatedProducts.length">
@@ -248,7 +253,6 @@ onMounted(async () => {
         </div>
       </div>
 
-      <!-- paginação -->
       <nav v-if="totalPages > 1" aria-label="Paginação">
         <ul class="pagination justify-content-center">
           <li class="page-item" :class="{ disabled: currentPage === 1 }">
@@ -268,7 +272,6 @@ onMounted(async () => {
     <p v-else>Você ainda não fez reviews em nenhum produto.</p>
   </div>
 
-  <!-- Produtos cadastrados (loja) -->
   <div class="container-fluid pb-3 bg-white" v-if="userData.type !== 'INDIVIDUAL'">
     <div class="container-fluid d-flex">
       <div class="hstack gap-3 mt-5 me-auto">
@@ -291,24 +294,30 @@ onMounted(async () => {
     <div class="container-fluid mt-5 mb-5 col-md-11" v-if="viewType === 'columns'">
       <div class="row row-cols-1 row-cols-md-6 g-4">
         <div class="product-card" v-for="product in paginatedProducts" :key="product.id">
-          <div class="card rounded-3 h-100 text-truncate">
+          <div class="card rounded-3 h-100 text-truncate position-relative">
             <div class="content-card" @click="goToDetails(product.id)">
               <div class="d-flex justify-content-center align-items-center img-container">
-                <img class="img-fluid product-img" :src="product.image" :alt="product.name">
+                <img class="img-fluid product-img" :src="product.image" :alt="product.name" />
               </div>
               <div class="card-body">
-                <div class="hstack">
-                  <h4 class="fw-bold text-truncate">{{ product.name }}</h4>
+                <div class="hstack align-items-center gap-2">
+                  <h4 class="fw-bold text-truncate mb-0">{{ product.name }}</h4>
+                  <i v-if="product.disabled" class="bi bi-slash-circle-fill text-danger" title="Produto desativado"
+                    style="font-size: 1.3rem"></i>
                 </div>
-                <p class="card-text text-truncate">Marca: <strong>{{ product.brandModel?.name || 'Sem Marca' }}</strong></p>
+
+                <p class="card-text text-truncate">
+                  Marca: <strong>{{ product.brandModel?.name || 'Sem Marca' }}</strong>
+                </p>
                 <p class="card-text text-truncate">{{ product.description }}</p>
                 <p class="price text-truncate">R$ {{ product.price }}</p>
+
+                <p v-if="product.disabled" class="badge bg-danger bg-opacity-25 text-danger rounded-4 p-2 w-fit mt-2">
+                  Produto desativado
+                </p>
               </div>
             </div>
             <div class="card-actions">
-              <CustomButton @click.stop="deleteProduct(product.id)" class="action-button">
-                <i class="bi bi-trash-fill"></i>
-              </CustomButton>
               <CustomButton @click.stop="goToUpdate(product.id)" class="action-button">
                 <i class="bi bi-pencil-square"></i>
               </CustomButton>
@@ -320,7 +329,6 @@ onMounted(async () => {
         </div>
       </div>
 
-      <!-- paginação -->
       <nav v-if="totalPages > 1" aria-label="Paginação">
         <ul class="pagination justify-content-center">
           <li class="page-item" :class="{ disabled: currentPage === 1 }">
@@ -357,10 +365,20 @@ onMounted(async () => {
               <tr v-for="product in paginatedProducts" :key="product.id">
                 <td>
                   <div class="d-flex justify-content-center align-items-center img-container-list">
-                    <img class="img-fluid rounded-2 product-img-list" :src="product.image" :alt="product.name">
+                    <img class="img-fluid rounded-2 product-img-list" :src="product.image" :alt="product.name" />
                   </div>
                 </td>
-                <td>{{ product.name }}</td>
+                <td>
+                  <div class="d-flex align-items-center gap-1">
+                    {{ product.name }}
+                    <i v-if="product.disabled" class="bi bi-slash-circle-fill text-danger" title="Produto desativado"
+                      style="font-size: 1.1rem"></i>
+                  </div>
+                  <p v-if="product.disabled" class="badge bg-danger bg-opacity-25 text-danger rounded-4 p-1 mt-1"
+                    style="font-size: 0.75rem; width: max-content;">
+                    Produto desativado
+                  </p>
+                </td>
                 <td>{{ product.brandModel?.name || 'Sem Marca' }}</td>
                 <td class="price">R$ {{ product.price }}</td>
                 <td>{{ product.type }}</td>
@@ -377,11 +395,11 @@ onMounted(async () => {
             </tbody>
           </table>
 
-          <!-- paginação -->
           <nav v-if="totalPages > 1" aria-label="Paginação">
             <ul class="pagination justify-content-center">
               <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                <button class="page-link" @click="goToPage(currentPage - 1)" aria-label="Página anterior">&laquo;</button>
+                <button class="page-link" @click="goToPage(currentPage - 1)"
+                  aria-label="Página anterior">&laquo;</button>
               </li>
 
               <li v-for="page in totalPages" :key="page" class="page-item" :class="{ active: page === currentPage }">
@@ -389,7 +407,8 @@ onMounted(async () => {
               </li>
 
               <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-                <button class="page-link" @click="goToPage(currentPage + 1)" aria-label="Próxima página">&raquo;</button>
+                <button class="page-link" @click="goToPage(currentPage + 1)"
+                  aria-label="Próxima página">&raquo;</button>
               </li>
             </ul>
           </nav>

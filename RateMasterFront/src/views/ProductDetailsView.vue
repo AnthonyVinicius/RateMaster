@@ -52,7 +52,6 @@ const fetchProductDetails = async () => {
 
     product.value = await daoProducts.getById(productId);
 
-    console.log("Dados do produto:", product.value);
 
     userData.value = product.value.userModel?.id || null;
 
