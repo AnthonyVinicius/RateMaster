@@ -1,6 +1,23 @@
 <script setup>
 import ReviewHomePage from '@/components/ReviewHomePage.vue';
 import UserReview from '@/components/UserReview.vue';
+import { ref } from 'vue';
+
+const name = ref("");
+const email = ref("");
+const message = ref("");
+
+const submitContactForm = () => {
+  if (!name.value || !email.value || !message.value) {
+    alert("Por favor, preencha todos os campos.");
+    return;
+  }
+
+  alert("Mensagem enviada com sucesso! Entraremos em contato em breve.");
+  name.value = "";
+  email.value = "";
+  message.value = "";
+};
 </script>
 
 <template>
@@ -108,15 +125,35 @@ import UserReview from '@/components/UserReview.vue';
         </div>
     </div>
     <div class="container-fluid colored-comment-container">
-        <div class="row">
-            <div class="col p-5 d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class="display-4 text-white text-start">Entre em contato conosco.</h1>
-                    <p class="lead text-white text-start">Descubra como nossa plataforma pode ajudá-lo.</p>
-                </div>
-            </div>
+    <div class="row col">
+      <div class="col p-5 d-flex flex-column flex-md-row justify-content-between align-items-start">
+        <div class="mb-4 mb-md-0 me-md-5">
+          <h1 class="display-4 text-white text-start">Entre em contato conosco.</h1>
+          <p class="lead text-white text-start">Descubra como nossa plataforma pode ajudá-lo.</p>
         </div>
+        <div class="contact-form col-5">
+          <form @submit.prevent="submitContactForm">
+            <div class="mb-3">
+              <label for="contactName" class="form-label text-white">Nome</label>
+              <input type="text" id="contactName" v-model="name" class="form-control" placeholder="Seu nome" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="contactEmail" class="form-label text-white">Email</label>
+              <input type="email" id="contactEmail" v-model="email" class="form-control" placeholder="seu@email.com" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="contactMessage" class="form-label text-white">Mensagem</label>
+              <textarea id="contactMessage" v-model="message" class="form-control" rows="4" placeholder="Digite sua mensagem" required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-light w-100">Enviar Mensagem</button>
+          </form>
+        </div>
+      </div>
     </div>
+  </div>
 </template>
 
 <style scoped>
@@ -147,5 +184,12 @@ button:hover {
 .review-logo {
     width: 100px;
 
+}
+.contact-form .form-control {
+  padding: 0.75rem 1rem;
+}
+
+.contact-form button:hover {
+  transform: scale(1.02);
 }
 </style>

@@ -55,6 +55,7 @@ public class SecurityConfigurations {
                         .requestMatchers(HttpMethod.GET, "/api/product/myProducts").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/product/update/{id}").hasRole("BUSINESS")
                         .requestMatchers(HttpMethod.DELETE, "/api/product/delete/{id}").hasRole("BUSINESS")
+                        .requestMatchers(HttpMethod.GET, "/api/product/reviewedBy/{Id}").authenticated()
                         //Review
                         .requestMatchers(HttpMethod.GET, "/api/review").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/review/register").authenticated()

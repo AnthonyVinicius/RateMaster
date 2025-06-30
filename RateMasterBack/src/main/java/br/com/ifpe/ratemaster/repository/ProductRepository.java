@@ -20,5 +20,12 @@ public interface ProductRepository extends JpaRepository<ProductModel, Long> {
 """)
     Optional<ProductModel> findByIdWithReviewsAndResponses(@Param("id") Long id);
 
+    @Query("""
+    SELECT DISTINCT p FROM ProductModel p
+    JOIN p.reviewModels r
+    WHERE r.user.id = :userId
+""")
+    List<ProductModel> findDistinctByReviewModelsUserId(@Param("userId") String userId);
+
 
 }

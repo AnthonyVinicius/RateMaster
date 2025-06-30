@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "tb_brand")
+@Table(name = "tb_brands")
 public class BrandModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

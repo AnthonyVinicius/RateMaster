@@ -1,6 +1,6 @@
 <script setup>
 import CustomButton from '@/components/CustomButton.vue';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { authState } from '@/services/AuthService';
 import ProductDAO from '@/services/ProductDAO';
@@ -28,20 +28,25 @@ const newUserName = ref('');
 const isEditingProfileImage = ref(false);
 const newProfileImageUrl = ref('');
 
-const editProfileImage = () => {
-  newProfileImageUrl.value = userData.value.image || '';
-  isEditingProfileImage.value = true;
+// PAGINAÇÃO
+const currentPage = ref(1);
+const pageSize = 12; // quantidade por página
+const totalPages = computed(() => Math.ceil(products.value.length / pageSize));
+const paginatedProducts = computed(() => {
+  const start = (currentPage.value - 1) * pageSize;
+  return products.value.slice(start, start + pageSize);
+});
+const goToPage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
 };
 
-const cancelEditProfileImage = () => {
-  isEditingProfileImage.value = false;
-  newProfileImageUrl.value = '';
-};
-
+const editProfileImage = () => { newProfileImageUrl.value = userData.value.image || ''; isEditingProfileImage.value = true; };
+const cancelEditProfileImage = () => { isEditingProfileImage.value = false; newProfileImageUrl.value = ''; };
 const updateProfileImage = async () => {
   const updatedImage = (newProfileImageUrl.value || '').trim();
   if (!updatedImage) return;
-
   isEditingProfileImage.value = false;
   try {
     await userDAO.update(authState.userId, { image: updatedImage });
@@ -52,6 +57,7 @@ const updateProfileImage = async () => {
     triggerAlert('Erro ao atualizar a imagem.', 'danger');
   }
 };
+
 const loadData = async () => {
   try {
     const data = await userDAO.getUserData();
@@ -78,20 +84,11 @@ const triggerAlert = (message, type = 'success') => {
 const viewTypeColumns = () => { viewType.value = 'columns'; };
 const viewTypeList = () => { viewType.value = 'list'; };
 
-const editUserName = () => {
-  newUserName.value = userData.value.name || '';
-  isEditingUserName.value = true;
-};
-
-const cancelEditUserName = () => {
-  isEditingUserName.value = false;
-  newUserName.value = '';
-};
-
+const editUserName = () => { newUserName.value = userData.value.name || ''; isEditingUserName.value = true; };
+const cancelEditUserName = () => { isEditingUserName.value = false; newUserName.value = ''; };
 const updateUserName = async () => {
   const updatedName = (newUserName.value || '').trim();
   if (!updatedName) return;
-
   isEditingUserName.value = false;
   try {
     await userDAO.update(authState.userId, { name: updatedName });
@@ -105,13 +102,6 @@ const updateUserName = async () => {
   }
 };
 
-const fetchProducts = async () => {
-  try {
-    products.value = await daoProducts.getMyProducts();
-  } catch (error) {
-    console.error('Erro ao buscar produtos:', error);
-  }
-};
 const updateBackgroundColor = async () => {
   try {
     await userDAO.update(authState.userId, { backGroundColor: userData.value.backGroundColor });
@@ -134,21 +124,24 @@ const deleteProduct = async (id) => {
   }
 };
 
-const goToUpdate = (productId) => {
-  router.push({ name: 'updateProducts', params: { id: productId } });
-};
-
-const goToDetails = (productId) => {
-  router.push({ name: 'productDetail', params: { id: productId } });
-};
+const goToUpdate = (productId) => { router.push({ name: 'updateProducts', params: { id: productId } }); };
+const goToDetails = (productId) => { router.push({ name: 'productDetail', params: { id: productId } }); };
 
 onMounted(async () => {
   await loadData();
-  await fetchProducts();
+  try {
+    if (userData.value.type !== 'INDIVIDUAL') {
+      products.value = await daoProducts.getMyProducts();
+    } else {
+      products.value = await daoProducts.getProductsReviewedByUser(authState.userId);
+    }
+    products.value = products.value || [];
+  } catch (error) {
+    console.error('Erro ao carregar produtos:', error);
+    products.value = [];
+  }
 });
 </script>
-
-
 
 <template>
   <div class="text-white d-flex flex-row profile-background position-relative"
@@ -193,14 +186,12 @@ onMounted(async () => {
 
       </div>
     </div>
+
     <div class="ms-4 user-info d-flex">
       <div class="d-flex flex-column justify-content-center">
-
         <h5 v-if="!isEditingUserName" class="profile-text">{{ userData.name }}</h5>
 
-
         <div class="hstack gap-2" v-if="isEditingUserName">
-
           <input v-if="isEditingUserName" v-model="newUserName" type="text" class="form-control input-name" />
 
           <CustomButton @click="updateUserName" :disabled="!(newUserName?.trim?.() ?? '')">
@@ -210,17 +201,11 @@ onMounted(async () => {
           <CustomButton @click="cancelEditUserName">
             Cancelar
           </CustomButton>
-
         </div>
 
         <h5 class="email-text">{{ userData.email }}</h5>
-
       </div>
-
-
     </div>
-
-
   </div>
 
   <div v-if="showAlert" :class="`alert alert-${alertType} alert-dismissible fade show custom-alert m-3`" role="alert">
@@ -231,6 +216,46 @@ onMounted(async () => {
     <button type="button" class="btn-close" @click="showAlert = false"></button>
   </div>
 
+  <!-- Produtos avaliados (perfil individual) -->
+  <div class="container mt-5" v-if="userData.type === 'INDIVIDUAL'">
+    <h3>Produtos que você avaliou</h3>
+    <div v-if="paginatedProducts.length">
+      <div class="row row-cols-1 row-cols-md-4 g-4">
+        <div class="product-card" v-for="product in paginatedProducts" :key="product.id">
+          <div class="card rounded-3 h-100 text-truncate" @click="goToDetails(product.id)">
+            <div class="d-flex justify-content-center align-items-center img-container">
+              <img class="img-fluid product-img" :src="product.image" :alt="product.name">
+            </div>
+            <div class="card-body">
+              <h5 class="fw-bold text-truncate">{{ product.name }}</h5>
+              <p class="card-text text-truncate">{{ product.description }}</p>
+              <p class="price text-truncate">R$ {{ product.price }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- paginação -->
+      <nav v-if="totalPages > 1" aria-label="Paginação">
+        <ul class="pagination justify-content-center">
+          <li class="page-item" :class="{ disabled: currentPage === 1 }">
+            <button class="page-link" @click="goToPage(currentPage - 1)" aria-label="Página anterior">&laquo;</button>
+          </li>
+
+          <li v-for="page in totalPages" :key="page" class="page-item" :class="{ active: page === currentPage }">
+            <button class="page-link" @click="goToPage(page)">{{ page }}</button>
+          </li>
+
+          <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+            <button class="page-link" @click="goToPage(currentPage + 1)" aria-label="Próxima página">&raquo;</button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <p v-else>Você ainda não fez reviews em nenhum produto.</p>
+  </div>
+
+  <!-- Produtos cadastrados (loja) -->
   <div class="container-fluid pb-3 bg-white" v-if="userData.type !== 'INDIVIDUAL'">
     <div class="container-fluid d-flex">
       <div class="hstack gap-3 mt-5 me-auto">
@@ -252,7 +277,7 @@ onMounted(async () => {
 
     <div class="container-fluid mt-5 mb-5 col-md-11" v-if="viewType === 'columns'">
       <div class="row row-cols-1 row-cols-md-6 g-4">
-        <div class="product-card" v-for="product in products" :key="product.id">
+        <div class="product-card" v-for="product in paginatedProducts" :key="product.id">
           <div class="card rounded-3 h-100 text-truncate">
             <div class="content-card" @click="goToDetails(product.id)">
               <div class="d-flex justify-content-center align-items-center img-container">
@@ -262,8 +287,7 @@ onMounted(async () => {
                 <div class="hstack">
                   <h4 class="fw-bold text-truncate">{{ product.name }}</h4>
                 </div>
-                <p class="card-text text-truncate">Marca: <strong>{{ product.brandModel?.name || 'Sem Marca' }}</strong>
-                </p>
+                <p class="card-text text-truncate">Marca: <strong>{{ product.brandModel?.name || 'Sem Marca' }}</strong></p>
                 <p class="card-text text-truncate">{{ product.description }}</p>
                 <p class="price text-truncate">R$ {{ product.price }}</p>
               </div>
@@ -279,6 +303,23 @@ onMounted(async () => {
           </div>
         </div>
       </div>
+
+      <!-- paginação -->
+      <nav v-if="totalPages > 1" aria-label="Paginação">
+        <ul class="pagination justify-content-center">
+          <li class="page-item" :class="{ disabled: currentPage === 1 }">
+            <button class="page-link" @click="goToPage(currentPage - 1)" aria-label="Página anterior">&laquo;</button>
+          </li>
+
+          <li v-for="page in totalPages" :key="page" class="page-item" :class="{ active: page === currentPage }">
+            <button class="page-link" @click="goToPage(page)">{{ page }}</button>
+          </li>
+
+          <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+            <button class="page-link" @click="goToPage(currentPage + 1)" aria-label="Próxima página">&raquo;</button>
+          </li>
+        </ul>
+      </nav>
     </div>
 
     <div class="mt-3 pt-5 text-body" v-if="viewType == 'list'">
@@ -297,7 +338,7 @@ onMounted(async () => {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="product in products" :key="product.id">
+              <tr v-for="product in paginatedProducts" :key="product.id">
                 <td>
                   <div class="d-flex justify-content-center align-items-center img-container-list">
                     <img class="img-fluid rounded-2 product-img-list" :src="product.image" :alt="product.name">
@@ -319,12 +360,29 @@ onMounted(async () => {
               </tr>
             </tbody>
           </table>
+
+          <!-- paginação -->
+          <nav v-if="totalPages > 1" aria-label="Paginação">
+            <ul class="pagination justify-content-center">
+              <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                <button class="page-link" @click="goToPage(currentPage - 1)" aria-label="Página anterior">&laquo;</button>
+              </li>
+
+              <li v-for="page in totalPages" :key="page" class="page-item" :class="{ active: page === currentPage }">
+                <button class="page-link" @click="goToPage(page)">{{ page }}</button>
+              </li>
+
+              <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                <button class="page-link" @click="goToPage(currentPage + 1)" aria-label="Próxima página">&raquo;</button>
+              </li>
+            </ul>
+          </nav>
+
         </div>
       </div>
     </div>
   </div>
 </template>
-
 
 <style scoped>
 .profile-text {
@@ -377,6 +435,7 @@ onMounted(async () => {
   transition: opacity 0.3s ease;
   cursor: pointer;
 }
+
 .edit-image-container input {
   font-size: 0.8rem;
 }

@@ -12,7 +12,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "tb_response")
+@Table(name = "tb_responses")
 public class ResponseModel {
 
     @Id

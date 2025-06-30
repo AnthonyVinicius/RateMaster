@@ -156,7 +156,7 @@ onMounted(() => {
     <div class="card p-0 rounded-4 shadow-sm" v-if="product">
       <div class="row g-0">
         <div class="col bg-light d-flex justify-content-center align-items-center p-5 rounded-start-3">
-          <img :src="product.image" class="img-fluid rounded-4" :alt="product.name" style="max-width: 400px" />
+          <img :src="product.image" class="img-fluid rounded-4 product-image" :alt="product.name" />
         </div>
 
         <div class="col bg-white rounded-end-4 p-4">
@@ -207,7 +207,7 @@ onMounted(() => {
               'form-control': true,
               'is-valid': meta.touched && !errors.length,
               'is-invalid': meta.touched && errors.length,
-            }" rows="4" placeholder="Compartilhe sua experiência com o produto..."></textarea>
+            }" rows="3" placeholder="Compartilhe sua experiência com o produto..."></textarea>
           </Field>
           <ErrorMessage name="comment" class="invalid-feedback" />
         </div>
@@ -224,34 +224,38 @@ onMounted(() => {
       </div>
       <div v-else class="row g-4">
         <div v-for="review in reviews" :key="review.id" class="col-12">
-          <div class="card shadow-sm p-4">
-            <div class="d-flex flex-column gap-4">
-              <div class="d-flex flex-column gap-2">
-                <div class="d-flex align-items-center gap-1">
+          <div class="card shadow-sm p-3 mb-3">
+            <div class="d-flex flex-column gap-3 small">
+              <div class="d-flex flex-column gap-1">
+                <div class="d-flex justify-content-between w-100">
                   <div class="text-warning">
-                    <i class="bi bi-star-fill" v-for="n in review.rating" :key="n"></i>
+                    <i class="bi bi-star-fill" v-for="n in review.rating" :key="n" style="font-size: 1rem;"></i>
                   </div>
-
-                  <div class="ms-auto text-secondary">{{ review.name }}</div>
-                </div>
-                <div class="text-muted small">
-                  <i class="bi bi-clock me-1"></i>
-                  {{
-                    review.createdAt
-                      ? formatDate(review.createdAt)
+                  <div class="d-flex flex-column align-items-end">
+                    <div class="text-secondary">{{ review.name }}</div>
+                    <div class="text-muted small">
+                      <i class="bi bi-clock me-1"></i>
+                      {{
+                        review.createdAt
+                          ? formatDate(review.createdAt)
                       : "Data não disponível"
-                  }}
+                      }}
+                    </div>
+                  </div>
                 </div>
               </div>
-              <p class="mb-0">{{ review.comment }}</p>
+              <p class="mb-0 text-truncate"
+                style="max-height: 4.5em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; white-space: normal;">
+                {{ review.comment }}
+              </p>
 
-              <div v-if="review.responses && review.responses.length > 0" class="bg-light rounded-3 p-4 mt-3">
-                <h5 class="fw-bold mb-4">Respostas da Loja</h5>
+              <div v-if="review.responses && review.responses.length > 0" class="bg-light rounded-3 p-3 small">
+                <h5 class="fw-bold mb-1 fs-6">Respostas da Loja</h5>
 
                 <div v-for="response in review.responses" :key="response.id"
-                  class="bg-white rounded-3 p-3 mb-3 shadow-sm">
-                  <div class="mb-3">
-                    <div class="fw-semibold">
+                  class="bg-white rounded-3 p-2 mb-2 shadow-sm small">
+                  <div class="mb-2">
+                    <div class="fw-semibold fs-6">
                       <i class="bi bi-shop me-2"></i>{{ response.name }}
                     </div>
                     <div class="text-muted small mt-1">
@@ -263,18 +267,20 @@ onMounted(() => {
                       }}
                     </div>
                   </div>
-                  <p class="mb-0 text-secondary">{{ response.comment }}</p>
+                  <p class="mb-0 text-secondary text-truncate"
+                    style="max-height: 4.5em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; white-space: normal;">
+                    {{ response.comment }}
+                  </p>
                 </div>
               </div>
 
               <div
                 v-if="userType === 'business' && userData === userID && (!review.responses || review.responses.length === 0)"
-                class="bg-light rounded-3 p-4 mt-3">
+                class="bg-light rounded-3 p-3 mt-3 small">
                 <Form v-slot="{ resetForm }" @submit="(values) => submitResponse(review, values, { resetForm })">
                   <textarea v-if="responseStates[review.id]" v-model="responseStates[review.id].comment"
-                    class="form-control mb-3" rows="4" placeholder="Digite sua resposta como loja..."></textarea>
-
-                  <button type="submit" class="btn btn-primary">
+                    class="form-control mb-3" rows="3" placeholder="Digite sua resposta como loja..."></textarea>
+                  <button type="submit" class="btn btn-primary btn-sm">
                     <i class="bi bi-reply me-2"></i>Responder como Loja
                   </button>
                 </Form>
@@ -296,6 +302,10 @@ onMounted(() => {
   font-size: 1.1rem;
   padding: 0;
   transition: color 0.3s ease;
+}
+
+.product-image {
+  max-width: 250px;
 }
 
 .back-button:hover {

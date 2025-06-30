@@ -7,6 +7,7 @@ import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
+import CustomButton from '@/components/CustomButton.vue';
 
 const daoProducts = new ProductDAO();
 const daoUser = new GenericDAO('user');
@@ -22,7 +23,7 @@ const filters = ref({
 const selectedCategory = ref('Todas');
 const categories = ref([]);
 const currentPage = ref(1);
-const itemsPerPage = ref(2);
+const itemsPerPage = ref(3);
 
 const fetchProducts = async () => {
     try {
@@ -42,6 +43,11 @@ const fetchProducts = async () => {
     } catch (error) {
         console.error('Erro ao carregar produtos:', error);
     }
+};
+const getStoreAverageRating = (products) => {
+    if (!products.length) return 0;
+    const total = products.reduce((sum, p) => sum + parseFloat(p.averageRating), 0);
+    return (total / products.length).toFixed(1);
 };
 
 const filterProducts = computed(() => {
@@ -128,7 +134,7 @@ onMounted(() => {
         </div>
 
         <div class="row d-flex mt-5">
-            <section class="col-md-2">
+            <section class="col-md-3">
                 <aside class="bg-white p-4 pb-5 rounded-3 shadow-sm">
                     <div class="hstack mb-4">
                         <h6 class="filter-text m-0 p-0">Filtros</h6>
@@ -171,20 +177,30 @@ onMounted(() => {
                 </aside>
             </section>
 
-            <div class="mb-5 col-md-10">
+            <div class="mb-5 col-md-9">
                 <div v-for="[company, products] in paginatedCompanies" :key="company"
                     class="container bg-white shadow-sm rounded-2 p-3 mb-5">
                     <div class="d-flex align-items-center mb-3">
                         <img :src="products[0].userModel?.image || 'default-company.png'" alt="Logo da empresa"
                             class="company-logo me-2" />
-                        <h3 class="m-0">{{ company }}</h3>
-                        <button class="btn btn-outline-primary btn-sm ms-auto"
+                        <h3 class="m-0">
+                            {{ company }}
+                            <small class="text-warning ms-2">
+                                <i class="bi bi-star-fill"></i> {{ getStoreAverageRating(products) }}
+                            </small>
+                        </h3>
+                        <CustomButton class="ms-auto"
                             @click="goToStore(products[0].userModel.id)">
                             Visitar loja
-                        </button>
+                        </CustomButton>
                     </div>
-                    <Swiper :modules="[Navigation]" :slides-per-view="5" space-between="30" navigation
-                        class="product-swiper">
+                    <Swiper :modules="[Navigation]" :slides-per-view="1" space-between="15" navigation
+                        class="product-swiper" :breakpoints="{
+                            576: { slidesPerView: 2, spaceBetween: 20 },
+                            768: { slidesPerView: 3, spaceBetween: 25 },
+                            992: { slidesPerView: 4, spaceBetween: 30 },
+                            1200: { slidesPerView: 5, spaceBetween: 30 }
+                        }">
                         <SwiperSlide v-for="product in products" :key="product.id" @click="goToDetails(product.id)">
                             <div class="card rounded-3 text-truncate">
                                 <div class="d-flex justify-content-center align-items-center img-container">
@@ -219,16 +235,16 @@ onMounted(() => {
                     <nav>
                         <ul class="pagination">
                             <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                                <button class="page-link" @click="goToPage(currentPage - 1)">Anterior</button>
+                                <CustomButton class="page-link" @click="goToPage(currentPage - 1)">Anterior</CustomButton>
                             </li>
 
                             <li class="page-item" v-for="page in pageCount" :key="page"
                                 :class="{ active: page === currentPage }">
-                                <button class="page-link" @click="goToPage(page)">{{ page }}</button>
+                                <CustomButton class="page-link" @click="goToPage(page)">{{ page }}</CustomButton>
                             </li>
 
                             <li class="page-item" :class="{ disabled: currentPage === pageCount }">
-                                <button class="page-link" @click="goToPage(currentPage + 1)">Próxima</button>
+                                <CustomButton class="page-link" @click="goToPage(currentPage + 1)">Próxima</CustomButton>
                             </li>
                         </ul>
                     </nav>
@@ -337,5 +353,56 @@ onMounted(() => {
     font-size: 1.2rem;
     font-weight: 700;
     color: #2ecc71;
+}
+
+@media (max-width: 767.98px) {
+    .header {
+        font-size: 1.8rem;
+        text-align: center;
+    }
+
+    .company-logo {
+        width: 40px;
+        height: 40px;
+    }
+
+    .img-container {
+        height: 120px;
+    }
+
+    .filter-text {
+        font-size: 0.95rem;
+    }
+
+    .price {
+        font-size: 1rem;
+    }
+
+    .search-container input {
+        padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .col-md-2 {
+        width: 100%;
+    }
+
+    .col-md-10 {
+        width: 100%;
+    }
+
+    .product-swiper {
+        padding: 10px 0;
+    }
+
+    .img-container {
+        height: 100px;
+    }
+
+    .product-img {
+        height: 100px;
+    }
 }
 </style>

@@ -13,7 +13,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "tb_review")
+@Table(name = "tb_reviews")
 public class ReviewModel {
 
 	@Id
@@ -34,4 +34,7 @@ public class ReviewModel {
 	@JsonBackReference
 	private ProductModel productModel;
 
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "user_id")
+	private UserModel user;
 }

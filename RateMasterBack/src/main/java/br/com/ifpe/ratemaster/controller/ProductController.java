@@ -108,4 +108,10 @@ public class ProductController {
             return ResponseEntity.ok(savedProduct);
         }).orElse(ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/reviewedBy/{id}")
+    public List<ProductModel> getProductsReviewedByUser(@PathVariable String id) {
+        return productService.getProductsReviewedByUser(id);
+    }
+
 }

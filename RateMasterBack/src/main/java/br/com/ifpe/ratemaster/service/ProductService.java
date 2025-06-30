@@ -26,4 +26,9 @@ public class ProductService {
         return productRepository.findByIdWithReviewsAndResponses(id);
     }
     public List<ProductModel> findProductByCategory(String name) {return productRepository.findByCategoryModelName(name); }
+
+    public List<ProductModel> getProductsReviewedByUser(String id) {
+        return productRepository.findDistinctByReviewModelsUserId(id);
+    }
+
 }

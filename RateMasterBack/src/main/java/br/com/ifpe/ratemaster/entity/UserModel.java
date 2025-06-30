@@ -9,8 +9,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-@Table(name = "tb_user")
-@Entity(name = "tb_user")
+@Table(name = "tb_users")
+@Entity(name = "tb_users")
 @Getter
 @Setter
 @NoArgsConstructor
