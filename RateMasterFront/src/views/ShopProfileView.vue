@@ -105,27 +105,36 @@ onMounted(() => {
                 <div v-for="product in paginatedProducts" :key="product.id" class="col">
                     <div class="card rounded-3 text-truncate h-100" @click="goToDetails(product.id)" role="button"
                         tabindex="0" @keyup.enter="goToDetails(product.id)">
-                        <div class="d-flex justify-content-center align-items-center img-container">
-                            <img class="img-fluid product-img" :src="product.image" :alt="product.name">
-                        </div>
-                        <div class="card-body">
-                            <div class="vstack gap-3">
-                                <div class="hstack">
-                                    <h6 class="fw-bold text-truncate m-0">{{ product.name }}</h6>
-                                    <div class="ms-auto me-2 star">
-                                        <span class="star"><i class="bi bi-star-fill"></i></span>
-                                        {{ product.averageRating }}
-                                    </div>
-                                </div>
-                                <div class="d-flex flex-column">
-                                    <p class="card-text text-truncate">{{ product.description }}</p>
-                                    <p class="card-text text-truncate">{{ product.brandModel?.name }}</p>
-                                </div>
-                                <div class="d-flex flex-column">
-                                    <p class="price m-0 text-truncate">R$ {{ product.price }}</p>
-                                </div>
+                    <div class="d-flex justify-content-center align-items-center img-container">
+                        <img class="img-fluid product-img" :src="product.image" :alt="product.name">
+                    </div>
+                    <div class="card-body">
+                        <div class="vstack gap-3">
+                        <div class="hstack">
+                            <div class="d-flex align-items-center justify-content-between w-100">
+                            <h6 class="fw-bold text-truncate m-0">{{ product.name }}</h6>
+                            <span
+                                v-if="product.disabled"
+                                class="badge bg-danger bg-opacity-25 text-danger rounded-pill ms-2"
+                                style="font-size: 0.7rem"
+                            >
+                                Desativado
+                            </span>
+                            </div>
+                            <div class="ms-auto me-2 star">
+                            <span class="star"><i class="bi bi-star-fill"></i></span>
+                            {{ product.averageRating }}
                             </div>
                         </div>
+                        <div class="d-flex flex-column">
+                            <p class="card-text text-truncate">{{ product.description }}</p>
+                            <p class="card-text text-truncate">{{ product.brandModel?.name }}</p>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <p class="price m-0 text-truncate">R$ {{ product.price }}</p>
+                        </div>
+                        </div>
+                    </div>
                     </div>
                 </div>
             </div>
