@@ -52,6 +52,8 @@ const fetchProductDetails = async () => {
 
     product.value = await daoProducts.getById(productId);
 
+    console.log("Dados do produto:", product.value);
+
     userData.value = product.value.userModel?.id || null;
 
     reviews.value = product.value.reviewModels || [];
@@ -154,33 +156,51 @@ onMounted(() => {
     </button>
 
     <div class="card p-0 rounded-4 shadow-sm" v-if="product">
-      <div class="row g-0">
-        <div class="col bg-light d-flex justify-content-center align-items-center p-5 rounded-start-3">
-          <img :src="product.image" class="img-fluid rounded-4 product-image" :alt="product.name" />
-        </div>
-
-        <div class="col bg-white rounded-end-4 p-4">
-          <div class="d-flex flex-column gap-3">
-            <div class="d-flex align-items-center">
-              <h1 class="h2 text-truncate mb-0">{{ product.name }}</h1>
-              <div class="ms-auto me-3">
-                <div class="badge bg-warning bg-opacity-25 text-warning p-2 rounded-4">
-                  <i class="bi bi-star-fill me-1"></i>
-                  <span>{{ averageRating }}</span>
-                </div>
-              </div>
-            </div>
-            <p class="text-secondary text-truncate mb-0">{{ product.description }}</p>
-            <p class="text-secondary text-truncate mb-0">
-              <i class="bi bi-shop me-1"></i>{{ product.userModel?.name || "Empresa desconhecida" }}
-            </p>
-            <p class="fs-4 fw-bold text-success mb-0">R$ {{ product.price }}</p>
-          </div>
-        </div>
-      </div>
+  <div class="row g-0">
+    <div class="col bg-light d-flex justify-content-center align-items-center p-5 rounded-start-3">
+      <img :src="product.image" class="img-fluid rounded-4 product-image" :alt="product.name" />
     </div>
 
-    <div v-if="userType === 'individual'" class="mt-5">
+    <div class="col bg-white rounded-end-4 p-4">
+      <div class="d-flex flex-column gap-3">
+        <div class="d-flex align-items-center">
+          <h1 class="h2 text-truncate mb-0 d-flex align-items-center">
+            {{ product.name }}
+            <i
+              v-if="product.disabled"
+              class="bi bi-slash-circle-fill text-danger ms-2"
+              title="Produto desativado"
+              style="font-size: 1.5rem"
+            ></i>
+          </h1>
+          <div class="ms-auto me-3">
+            <div class="badge bg-warning bg-opacity-25 text-warning p-2 rounded-4">
+              <i class="bi bi-star-fill me-1"></i>
+              <span>{{ averageRating }}</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-secondary text-truncate mb-0">{{ product.description }}</p>
+
+        <p
+          v-if="product.disabled"
+          class="badge bg-danger bg-opacity-25 text-danger rounded-4 p-2 w-fit"
+        >
+          Produto desativado
+        </p>
+
+        <p class="text-secondary text-truncate mb-0">
+          <i class="bi bi-shop me-1"></i>{{ product.userModel?.name || "Empresa desconhecida" }}
+        </p>
+
+        <p class="fs-4 fw-bold text-success mb-0">R$ {{ product.price }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div v-if="product && userType === 'individual' && !product.disabled" class="mt-5">
       <Form @submit="submitReview" class="card p-5 shadow-sm">
         <h3 class="fw-bold mb-3">Deixe sua avaliação</h3>
         <div class="mb-3">

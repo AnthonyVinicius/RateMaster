@@ -203,29 +203,33 @@ onMounted(() => {
                         }">
                         <SwiperSlide v-for="product in products" :key="product.id" @click="goToDetails(product.id)">
                             <div class="card rounded-3 text-truncate">
-                                <div class="d-flex justify-content-center align-items-center img-container">
-                                    <img class="img-fluid product-img" :src="product.image" :alt="product.name">
-                                </div>
-                                <div class="card-body">
-                                    <div class="vstack gap-3">
-                                        <div class="hstack">
-                                            <h6 class="fw-bold text-truncate m-0">{{ product.name }}</h6>
-                                            <div class="ms-auto me-2 star">
-                                                <span class="star"><i class="bi bi-star-fill"></i></span>
-                                                {{ product.averageRating }}
-                                            </div>
-                                        </div>
-                                        <div class="d-flex flex-column">
-                                            <p class="card-text text-truncate">{{ product.description }}</p>
-                                            <p class="card-text text-truncate">{{ product.brandModel?.name }}</p>
-                                        </div>
-                                        <div class="d-flex flex-column">
-                                            <p class="price m-0 text-truncate">R$ {{ product.price }}</p>
-                                            <p class="card-text text-truncate mt-1">{{ product.userModel?.name ||
-                                                'Empresa desconhecida' }}</p>
-                                        </div>
+                            <div class="d-flex justify-content-center align-items-center img-container">
+                                <img class="img-fluid product-img" :src="product.image" :alt="product.name">
+                            </div>
+                            <div class="card-body">
+                                <div class="vstack gap-3">
+                                <div class="hstack">
+                                    <div class="d-flex align-items-center justify-content-between w-100">
+                                    <h6 class="fw-bold text-truncate m-0">{{ product.name }}</h6>
+                                    <span v-if="product.disabled" class="badge bg-danger bg-opacity-25 text-danger rounded-pill ms-2">
+                                    Desativado
+                                    </span>
+                                    </div>
+                                    <div class="ms-auto me-2 star">
+                                    <span class="star"><i class="bi bi-star-fill"></i></span>
+                                    {{ product.averageRating }}
                                     </div>
                                 </div>
+                                <div class="d-flex flex-column">
+                                    <p class="card-text text-truncate">{{ product.description }}</p>
+                                    <p class="card-text text-truncate">{{ product.brandModel?.name }}</p>
+                                </div>
+                                <div class="d-flex flex-column">
+                                    <p class="price m-0 text-truncate">R$ {{ product.price }}</p>
+                                    <p class="card-text text-truncate mt-1">{{ product.userModel?.name || 'Empresa desconhecida' }}</p>
+                                </div>
+                                </div>
+                            </div>
                             </div>
                         </SwiperSlide>
                     </Swiper>
