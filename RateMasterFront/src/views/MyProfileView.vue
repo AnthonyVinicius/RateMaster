@@ -129,18 +129,26 @@ const deleteProduct = async (id) => {
   }
 };
 
-const disableProduct = async (id) => {
-  if (confirm('Tem certeza de que deseja desativar este Produto?')) {
+const toggleProductStatus = async (product) => {
+  const action = product.disabled ? 'ativar' : 'desativar';
+  if (confirm(`Tem certeza de que deseja ${action} este Produto?`)) {
     try {
-      await daoProducts.disableProduct(id);
-      products.value = products.value.filter(product => product.id !== id);
-      triggerAlert('Produto desativado com sucesso!', 'success');
+      if (product.disabled) {
+        await daoProducts.disableProduct(product.id);
+        product.disabled = false;
+        triggerAlert('Produto ativado com sucesso!', 'success');
+      } else {
+        await daoProducts.disableProduct(product.id);
+        product.disabled = true;
+        triggerAlert('Produto desativado com sucesso!', 'success');
+      }
     } catch (error) {
       console.error(error);
-      triggerAlert('Erro ao desativar o produto.', 'danger');
+      triggerAlert(`Erro ao ${action} o produto.`, 'danger');
     }
   }
 };
+
 
 const goToUpdate = (productId) => { router.push({ name: 'updateProducts', params: { id: productId } }); };
 
@@ -321,8 +329,9 @@ onMounted(async () => {
               <CustomButton @click.stop="goToUpdate(product.id)" class="action-button">
                 <i class="bi bi-pencil-square"></i>
               </CustomButton>
-              <CustomButton @click.stop="disableProduct(product.id)" class="action-button">
-                <i class="bi bi-x"></i>
+              <CustomButton @click.stop="toggleProductStatus(product)" class="action-button">
+                <i v-if="!product.disabled" class="bi bi-x"></i>
+                <i v-else class="bi bi-check-lg"></i>
               </CustomButton>
             </div>
           </div>
