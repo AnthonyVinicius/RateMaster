@@ -87,6 +87,19 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
+    @PutMapping("/disable/{id}")
+    public ResponseEntity<Object> disableProductById(@PathVariable Long id) {
+        return productService.findProductById(id).map(product ->{
+            if(product.getDisabled()){
+                product.setDisabled(false);
+            } else {
+                product.setDisabled(true);
+            }
+            productService.saveProduct(product);
+            return ResponseEntity.noContent().build();
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
     @PutMapping("/update/{id}")
     public ResponseEntity<ProductModel> updateProduct(@PathVariable Long id, @RequestBody ProductDTO dto) {
         return productService.findProductById(id).map(existingProduct -> {

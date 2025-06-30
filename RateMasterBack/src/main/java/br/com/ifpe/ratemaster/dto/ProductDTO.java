@@ -9,4 +9,5 @@ public class ProductDTO {
     public Long categoryModel;
     public String image;
     public String userId;
+    public Boolean isDisabled;
 }

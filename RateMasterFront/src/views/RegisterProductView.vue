@@ -98,7 +98,7 @@ const submit = async () => {
     brandModel,
     userId,
     categoryModel,
-    type
+    type,
   };
 
   await daoProducts.insert(productData);

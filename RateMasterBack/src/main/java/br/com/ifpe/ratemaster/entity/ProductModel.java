@@ -43,4 +43,7 @@ public class ProductModel {
 	@OneToMany(mappedBy = "productModel", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JsonManagedReference
 	private List<ReviewModel> reviewModels;
+
+	@Column(nullable = false)
+	private Boolean disabled = false;
 }

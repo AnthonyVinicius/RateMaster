@@ -18,6 +18,11 @@ class ProductDAO extends GenericDAO {
       return [];
     }
   }
+
+    async disableProduct(id) {
+    return await apiRequest('put', `/${this.resourcePath}/disable/${id}`)
+  }
 }
+
 
 export default ProductDAO;

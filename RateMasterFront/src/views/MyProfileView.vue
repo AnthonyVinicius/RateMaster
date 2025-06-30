@@ -124,6 +124,19 @@ const deleteProduct = async (id) => {
   }
 };
 
+const disableProduct = async (id) => {
+  if (confirm('Tem certeza de que deseja desativar este Produto?')) {
+    try {
+      await daoProducts.disableProduct(id);
+      products.value = products.value.filter(product => product.id !== id);
+      triggerAlert('Produto desativado com sucesso!', 'success');
+    } catch (error) {
+      console.error(error);
+      triggerAlert('Erro ao desativar o produto.', 'danger');
+    }
+  }
+};
+
 const goToUpdate = (productId) => { router.push({ name: 'updateProducts', params: { id: productId } }); };
 const goToDetails = (productId) => { router.push({ name: 'productDetail', params: { id: productId } }); };
 
@@ -298,6 +311,9 @@ onMounted(async () => {
               </CustomButton>
               <CustomButton @click.stop="goToUpdate(product.id)" class="action-button">
                 <i class="bi bi-pencil-square"></i>
+              </CustomButton>
+              <CustomButton @click.stop="disableProduct(product.id)" class="action-button">
+                <i class="bi bi-x"></i>
               </CustomButton>
             </div>
           </div>
