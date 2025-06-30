@@ -16,6 +16,7 @@ const alertMessage = ref(null);
 const alertType = ref('success');
 const showAlert = ref(false);
 const auth = computed(() => authState.isLogged);
+const idUser = computed(() => authState.userId);
 
 
 
@@ -43,7 +44,7 @@ const addBrand = async () => {
         return;
     }
     try {
-        await daoBrands.insert({ name: trimmedBrand });
+        await daoBrands.insert({ name: trimmedBrand,  userId: idUser.value});
         await showAllBrands();
         newBrand.value = '';
         triggerAlert('Marca adicionada com sucesso!', 'success');
@@ -160,12 +161,14 @@ onMounted(async () => {
                             </CustomButton>
                         </div>
                         <div v-else>
-                            <CustomButton @click="editBrand(brand)" type="button" class="btn ms-2 me-2">
-                                <i class="bi bi-pencil-square"></i>
-                            </CustomButton>
-                            <CustomButton @click="deleteBrand(brand.id)" type="button" class="btn ms-2 me-2">
-                                <i class="bi bi-trash-fill"></i>
-                            </CustomButton>
+                            <div v-if="brand.userModel?.id === idUser">
+                                <CustomButton @click="editBrand(brand)" type="button" class="btn ms-2 me-2">
+                                    <i class="bi bi-pencil-square"></i>
+                                </CustomButton>
+                                <CustomButton @click="deleteBrand(brand.id)" type="button" class="btn ms-2 me-2">
+                                    <i class="bi bi-trash-fill"></i>
+                                </CustomButton>
+                            </div>
                         </div>
                     </td>
                 </tr>

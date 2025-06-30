@@ -1,7 +1,10 @@
 package br.com.ifpe.ratemaster.controller;
 
+import br.com.ifpe.ratemaster.dto.BrandDTO;
 import br.com.ifpe.ratemaster.entity.BrandModel;
+import br.com.ifpe.ratemaster.entity.UserModel;
 import br.com.ifpe.ratemaster.service.BrandService;
+import br.com.ifpe.ratemaster.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,6 +18,9 @@ public class BrandController {
 
     @Autowired
     private BrandService brandService;
+
+    @Autowired
+    private UserService userService;
 
     @GetMapping
     public List<BrandModel> listAllBrands() {
@@ -30,8 +36,16 @@ public class BrandController {
 
     @PostMapping("/register")
     @PreAuthorize("hasRole('BUSINESS')")
-    public BrandModel registerBrand(@RequestBody BrandModel brandModel) {
+    public BrandModel registerBrand(@RequestBody BrandDTO brandDTO) {
+        BrandModel brandModel = new BrandModel();
+        brandModel.setName(brandDTO.name);
+
+        UserModel user = userService.findUserById(brandDTO.userId).orElseThrow();
+
+        brandModel.setUserModel(user);
+
         return brandService.saveBrand(brandModel);
+
     }
 
     @DeleteMapping("/delete/{id}")

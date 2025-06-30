@@ -20,4 +20,8 @@ public class BrandModel {
     @Column(unique = true)
     private String name;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id")
+    private UserModel userModel;
+
 }
